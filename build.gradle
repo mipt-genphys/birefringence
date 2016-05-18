@@ -1,0 +1,27 @@
+group 'ru.mipt.physics'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.grooscript:grooscript-gradle-plugin:1.2.3'
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'org.grooscript.conversion'
+
+repositories {
+    mavenCentral()
+}
+
+grooscript {
+    recursive = true //Default is false
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.6';
+    compile 'org.grooscript:grooscript:1.2.3';
+}

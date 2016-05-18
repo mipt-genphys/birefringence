@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.grooscript:grooscript:1.2.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.grooscript/grooscript/1.2.3/db88f3cd88118ff9e1c5e339f1e3922ae32debf0/grooscript-1.2.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.grooscript/grooscript/1.2.3/9c0d3ce70d833878900f09f76346582ac441dc20/grooscript-1.2.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
