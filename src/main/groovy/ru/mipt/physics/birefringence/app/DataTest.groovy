@@ -1,4 +1,9 @@
-package ru.mipt.physics.birefringence
+package ru.mipt.physics.birefringence.app
+
+import ru.mipt.physics.birefringence.Data
+import ru.mipt.physics.birefringence.Evaluator
+import ru.mipt.physics.birefringence.Vector
+
 
 /**
  * Created by darksnake on 18-May-16.
@@ -7,7 +12,7 @@ package ru.mipt.physics.birefringence
 
 Vector readVector(String path) {
     List<Double> vals = new ArrayList<>();
-    Data.class.getResource(path).eachLine {
+    Evaluator.class.getResource(path).eachLine {
         vals.add(it.replace(",",".").toDouble()*Math.PI/180)
     }
     return new Vector(vals)

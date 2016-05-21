@@ -6,16 +6,43 @@ import static java.lang.Math.*;
  * Created by darksnake on 18-May-16.
  */
 class Evaluator {
-
-    private Vector nVector(Vector phi1, Vector phi2, double a) {
+    Vector nVector(Vector phi1, Vector psi, double a) {
+        Vector phi2 = psi - phi1 + a;
         return (phi1.sin()**2 + phi2.sin()**2 + phi1.sin() * phi2.sin() * cos(a) * 2).sqrt() / sin(a);
     }
 
-    private Vector costhVector(Vector phi1, Vector n) {
+    double n(double phi1, double psi, double a) {
+        double phi2 = psi - phi1 + a;
+        return sqrt(sin(phi1)**2 + sin(phi2)**2 + sin(phi1) * sin(phi2) * cos(a) * 2) / sin(a);
+    }
+
+    Vector costhVector(Vector phi1, Vector n) {
         return phi1.sin() / n;
     }
 
-    private Vector sigmanVector(Vector phi1, Vector phi2, Vector n, double a, double aErr, double phi1Err, double psiErr) {
+    double costh(double phi1, double n) {
+        return sin(phi1) / n;
+    }
+
+    double costh(double phi1, double psi, double a) {
+        double phi2 = psi - phi1 + a;
+
+    }
+
+    double sigman(double phi1, double psi, double n, double a, double aErr, double phi1Err, double psiErr) {
+        double phi2 = psi - phi1 + a;
+        def nal = (0.5 * sin(2 * phi1) - 0.5 * sin(2 * phi2) -
+                cos(a) * sin(phi1 - phi2)) / (2 * (n * sin(a)**2));
+        def nb = -(sin(phi2) * cos(phi2) +
+                cos(a) * sin(phi1) * cos(phi2)) / (n * sin(a)**2);
+        def na = -(n * cos(a)) / sin(a) + (0.5 * sin(2 * phi2) +
+                sin(phi1) * cos(a + phi2)) / (n * sin(a)**2)
+        double res = sqrt((2 * phi1Err * nal)**2 + (nb * psiErr)**2 + (na * aErr)**2)
+        return res;
+    }
+
+    Vector sigmanVector(Vector phi1, Vector psi, Vector n, double a, double aErr, double phi1Err, double psiErr) {
+        Vector phi2 = psi - phi1 + a;
         double[] res = new double[phi1.size()];
         for (int i = 0; i < phi1.size(); i++) {
             def nal = (0.5 * sin(2 * phi1[i]) - 0.5 * sin(2 * phi2[i]) -
@@ -36,16 +63,9 @@ class Evaluator {
      */
     def checkAdjustment(Data data) {
 
-        Vector nVector = nVector(data.phi1, data.phi2o(), data.a);
+        Vector nVector = nVector(data.phi1, data.psio, data.a);
         Vector costhVector = costhVector(data.phi1, nVector);
-        Vector sigmanVector = sigmanVector(data.phi1, data.phi2o(), nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
-
-//        def chi2Func = { Double k, Double k0 ->
-//            (((nVector - costhVector**2 * k - k0) / sigmanVector)**2)// chi2 expression
-//                    .values() // as double array
-//                    .sum(); // sum of the array
-//        }
-
+        Vector sigmanVector = sigmanVector(data.phi1, data.psio, nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
 
         double chi2Min = Double.MAX_VALUE;
         double minK = 0;
@@ -79,11 +99,11 @@ class Evaluator {
      */
     def calculateno(Data data) {
 
-        Vector nVector = nVector(data.phi1, data.phi2o(), data.a);
-        Vector sigmanVector = sigmanVector(data.phi1, data.phi2o(), nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
+        Vector nVector = nVector(data.phi1, data.psio, data.a);
+        Vector sigmanVector = sigmanVector(data.phi1, data.psio, nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
 
         Vector weights = new Vector(sigmanVector.values().collect { 1 / it**2 })
-
+        // weighted average
         double sum = (nVector * weights).values().sum()
         double weight = weights.values().sum()
         def no = sum / weight
@@ -92,19 +112,16 @@ class Evaluator {
     }
 
     def calculatene(Data data) {
-        Vector nVector = nVector(data.phi1, data.phi2e(), data.a);
-        Vector sigmanVector = sigmanVector(data.phi1, data.phi2e(), nVector, data.a, data.aErr, data.phi1Err, data.psieErr);
+        Vector nVector = nVector(data.phi1, data.psie, data.a);
+        Vector sigmanVector = sigmanVector(data.phi1, data.psie, nVector, data.a, data.aErr, data.phi1Err, data.psieErr);
+        Vector costhVector = costhVector(data.phi1, nVector)
 
         double[][] m = new double[2][2];//initialized with zeroes
-//        m[0][0] = 0
-//        m[0][1] = 0
-//        m[1][0] = 0
-//        m[1][1] = 0
         double b0 = 0;
         double b1 = 0;
-        for (int i = 0; i < data.size(); i++) {
+        for (int i = 0; i < nVector.size(); i++) {
             def d1 = nVector[i]**6 / sigmanVector[i]**4 / 4d;
-            def d2 = (sin(data.phi1[i]) / nVector[i])**2
+            def d2 = (costhVector[i])**2
             m[0][0] += d1
             m[0][1] += d1 * d2
             m[1][1] += d2 * d2 * d1;
@@ -120,8 +137,8 @@ class Evaluator {
         mInv[1][1] = m[0][0] / det;
         def ne = 1 / sqrt(mInv[0][0] * b0 + mInv[0][1] * b1);
         def no = 1 / sqrt(mInv[1][0] * b0 + mInv[1][1] * b1 + ne**(-2));
-        def sigmane = sqrt(mInv[0][0]) * 0.5 * (mInv[0][0] * b0 + mInv[0][1] * b1)**(-3 / 2)
-        return new Tuple(no, ne, sigmane);
+        def neErr = sqrt(mInv[0][0]) * 0.5 * (mInv[0][0] * b0 + mInv[0][1] * b1)**(-3 / 2)
+        return new Tuple(no, ne, neErr);
     }
 
     /**

@@ -5,23 +5,11 @@ package ru.mipt.physics.birefringence
  */
 class Data {
     double a;
-    double aErr = 1
+    double aErr = Math.PI/180
     Vector phi1;
-    double phi1Err = 1
+    double phi1Err = Math.PI/180
     Vector psio;
-    double psioErr = 1
+    double psioErr = Math.PI/180
     Vector psie;
-    double psieErr = 1
-
-    Vector phi2o() {
-        return psio - phi1 + a
-    }
-
-    Vector phi2e() {
-        return psie - phi1 + a
-    }
-
-    int size() {
-        return phi1.size()
-    }
+    double psieErr = Math.PI/180
 }
