@@ -100,7 +100,10 @@ class BirefView implements Initializable {
         psiErrField.textProperty().addListener(listener);
 
         //initialize chart
-        XYPlot plot = new XYPlot(null, new NumberAxis("cos^2(theta)"), new NumberAxis("n"), new XYErrorRenderer());
+        NumberAxis xAxis =new NumberAxis("n");
+        NumberAxis yAxis =new NumberAxis("cos^2(theta)");
+        yAxis.setAutoRangeIncludesZero(false)
+        XYPlot plot = new XYPlot(null, xAxis, yAxis, new XYErrorRenderer());
         JFreeChart chart = new JFreeChart(plot);
         ChartViewer viewer = new ChartViewer(chart);
         chartPane.getChildren().add(viewer);
@@ -147,9 +150,9 @@ class BirefView implements Initializable {
         double phiErr = getPhiErr()
         double psiErr = getPsiErr();
         dataTable.items.forEach { TableData it ->
-            Double phi1 = it.phi1
-            Double psio = it.psio
-            Double psie = it.psie
+            Double phi1 = it.phi1* Math.PI / 180
+            Double psio = it.psio* Math.PI / 180
+            Double psie = it.psie* Math.PI / 180
 
             if (phi1) {
                 if (psio) {
