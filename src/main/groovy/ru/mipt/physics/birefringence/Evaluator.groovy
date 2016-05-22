@@ -56,51 +56,43 @@ class Evaluator {
         return new Vector(res);
     }
 
+
     /**
      * Adjustment check
      * @param data
      * @return
      */
-    def checkAdjustment(Data data) {
-
-        Vector nVector = nVector(data.phi1, data.psio, data.a);
-        Vector costhVector = costhVector(data.phi1, nVector);
-        Vector sigmanVector = sigmanVector(data.phi1, data.psio, nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
+    def checkAdjustment(Vector nVector, Vector costhVector, Vector sigmanVector) {
 
         double chi2Min = Double.MAX_VALUE;
-        double minK = 0;
-        double minK0 = 0;
+        double minSlope = 0;
+        double minBase = 0;
 
+        //TODO replace by analytic solution
         // Direct 2-parameter search
-        for (double k0 = 0; k0 < 3; k0 += 0.01) {
-            for (double k = -0.2; k < 0.2; k += 0.01) {
-                double chi2 = (((nVector - costhVector**2 * k - k0) / sigmanVector)**2)// chi2 expression
+        for (double base = 1; base < 2; base += 0.002) {
+            for (double slope = -0.2; slope < 0.2; slope += 0.002) {
+                def chi2 = (((nVector - costhVector**2 * slope - base) / sigmanVector)**2)// chi2 expression
                         .values() // as double array
                         .sum(); // sum of the array
                 if (chi2 < chi2Min) {
                     chi2Min = chi2;
-                    minK = k;
-                    minK0 = k0
+                    minSlope = slope;
+                    minBase = base
                 }
             }
         }
-
-        if (minK >= 0.02) {
-            println "incorrect adjustment";
-        }
-        //TODO make picture here
-
-        return new Tuple2<>(minK, minK0);
+        return new Tuple<>(minBase, minSlope, chi2Min);
     }
 
     /**
      * calculating no
      * @param data
      */
-    def calculateno(Data data) {
+    def calculateno(Vector nVector, Vector sigmanVector) {
 
-        Vector nVector = nVector(data.phi1, data.psio, data.a);
-        Vector sigmanVector = sigmanVector(data.phi1, data.psio, nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
+//        Vector nVector = nVector(data.phi1, data.psio, data.a);
+//        Vector sigmanVector = sigmanVector(data.phi1, data.psio, nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
 
         Vector weights = new Vector(sigmanVector.values().collect { 1 / it**2 })
         // weighted average
@@ -111,10 +103,10 @@ class Evaluator {
         return new Tuple2<>(no, noErr)
     }
 
-    def calculatene(Data data) {
-        Vector nVector = nVector(data.phi1, data.psie, data.a);
-        Vector sigmanVector = sigmanVector(data.phi1, data.psie, nVector, data.a, data.aErr, data.phi1Err, data.psieErr);
-        Vector costhVector = costhVector(data.phi1, nVector)
+    def calculatene(Vector nVector, Vector costhVector, Vector sigmanVector) {
+//        Vector nVector = nVector(data.phi1, data.psie, data.a);
+//        Vector sigmanVector = sigmanVector(data.phi1, data.psie, nVector, data.a, data.aErr, data.phi1Err, data.psieErr);
+//        Vector costhVector = costhVector(data.phi1, nVector)
 
         double[][] m = new double[2][2];//initialized with zeroes
         double b0 = 0;

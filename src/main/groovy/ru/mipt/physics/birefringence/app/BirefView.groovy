@@ -1,5 +1,6 @@
 package ru.mipt.physics.birefringence.app
 
+import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
@@ -7,10 +8,14 @@ import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.Node
 import javafx.scene.control.Alert
+import javafx.scene.control.ProgressIndicator
+import javafx.scene.control.Spinner
+import javafx.scene.control.SpinnerValueFactory
 import javafx.scene.control.TableColumn
 import javafx.scene.control.TableView
 import javafx.scene.control.TextArea
 import javafx.scene.control.TextField
+import javafx.scene.control.TitledPane
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.control.cell.TextFieldTableCell
 import javafx.scene.layout.AnchorPane
@@ -21,11 +26,18 @@ import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.fx.ChartViewer
 import org.jfree.chart.plot.XYPlot
 import org.jfree.chart.renderer.xy.XYErrorRenderer
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import org.jfree.data.xy.XYIntervalSeries
 import org.jfree.data.xy.XYIntervalSeriesCollection
 import org.jfree.data.xy.XYSeries
 import org.jfree.data.xy.XYSeriesCollection
+import ru.mipt.physics.birefringence.Data
 import ru.mipt.physics.birefringence.Evaluator
+import ru.mipt.physics.birefringence.Vector
+
+import java.awt.BasicStroke
+import java.awt.Color
+import java.awt.Stroke
 
 
 /**
@@ -34,13 +46,11 @@ import ru.mipt.physics.birefringence.Evaluator
 class BirefView implements Initializable {
 
     @FXML
-    private TextField aField;
+    private Spinner<Double> aField;
     @FXML
-    private TextField aErrField;
+    private Spinner<Double> phiErrField;
     @FXML
-    private TextField phiErrField;
-    @FXML
-    private TextField psiErrField;
+    private Spinner<Double> psiErrField;
 
     @FXML
     private TableView<TableData> dataTable;
@@ -54,7 +64,10 @@ class BirefView implements Initializable {
     private AnchorPane chartPane;
     @FXML
     private TextArea output;
-
+    @FXML
+    private TitledPane outputPane;
+    @FXML
+    private ProgressIndicator progressIndicator;
 
     private Evaluator ev = new Evaluator();
 
@@ -92,16 +105,24 @@ class BirefView implements Initializable {
         }
         dataTable.getSelectionModel().setCellSelectionEnabled(true);
 
-        ChangeListener<String> listener = { ObservableValue<? extends String> observable, String oldValue, String newValue -> updateChartData() };
+        ChangeListener<Double> listener = new ChangeListener<Double>() {
+            @Override
+            void changed(ObservableValue<? extends Double> observable, Double oldValue, Double newValue) {
+                updateChartData()
+            }
+        }
 
-        aField.textProperty().addListener(listener);
-        aErrField.textProperty().addListener(listener);
-        phiErrField.textProperty().addListener(listener);
-        psiErrField.textProperty().addListener(listener);
+        aField.valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(20d, 45d, 38d, 0.05d)
+        aField.valueProperty().addListener(listener);
+//        aErrField.textProperty().addListener(listener);
+        phiErrField.valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 3, 1, 0.05d)
+        phiErrField.valueProperty().addListener(listener);
+        psiErrField.valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 3, 1, 0.05d)
+        psiErrField.valueProperty().addListener(listener);
 
         //initialize chart
-        NumberAxis xAxis =new NumberAxis("n");
-        NumberAxis yAxis =new NumberAxis("cos^2(theta)");
+        NumberAxis xAxis = new NumberAxis("n");
+        NumberAxis yAxis = new NumberAxis("cos^2(theta)");
         yAxis.setAutoRangeIncludesZero(false)
         XYPlot plot = new XYPlot(null, xAxis, yAxis, new XYErrorRenderer());
         JFreeChart chart = new JFreeChart(plot);
@@ -119,6 +140,11 @@ class BirefView implements Initializable {
         XYSeriesCollection fitSeries = new XYSeriesCollection();
         fitSeries.addSeries(oFit)
         fitSeries.addSeries(eFit)
+        XYLineAndShapeRenderer lineRenderer =new XYLineAndShapeRenderer(true, false);
+        lineRenderer.setBaseStroke(new BasicStroke(2),false);
+        plot.setRenderer(1, lineRenderer)
+        lineRenderer.setSeriesPaint(0, Color.red)
+        lineRenderer.setSeriesPaint(1, Color.blue)
 
 
         plot.setDataset(0, dataSeries);
@@ -128,42 +154,43 @@ class BirefView implements Initializable {
     }
 
     private double getA() {
-        return aField.getText().toDouble() * Math.PI / 180;
+        return aField.getValue() * Math.PI / 180;
     }
 
-    private double getAErr() {
-        return aErrField.getText().toDouble() * Math.PI / 180;
-    }
+//    private double getAErr() {
+//        return aErrField.getText().toDouble() * Math.PI / 180;
+//    }
 
     private double getPhiErr() {
-        return phiErrField.getText().toDouble() * Math.PI / 180;
+        return phiErrField.getValue() * Math.PI / 180;
     }
 
     private double getPsiErr() {
-        return psiErrField.getText().toDouble() * Math.PI / 180;
+        return psiErrField.getValue() * Math.PI / 180;
     }
 
     void updateChartData() {
+        clearFits()
         clearDataPlots()
         double a = getA();
-        double aErr = getAErr()
+//        double aErr = getAErr()
         double phiErr = getPhiErr()
         double psiErr = getPsiErr();
         dataTable.items.forEach { TableData it ->
-            Double phi1 = it.phi1* Math.PI / 180
-            Double psio = it.psio* Math.PI / 180
-            Double psie = it.psie* Math.PI / 180
+            Double phi1 = it.phi1 * Math.PI / 180
+            Double psio = it.psio * Math.PI / 180
+            Double psie = it.psie * Math.PI / 180
 
             if (phi1) {
                 if (psio) {
                     double no = ev.n(phi1, psio, a);
-                    double noErr = ev.sigman(phi1, psio, no, a, aErr, phiErr, psiErr);
+                    double noErr = ev.sigman(phi1, psio, no, a, 0, phiErr, psiErr);
                     double costho2 = (ev.costh(phi1, no)**2d).doubleValue();
                     oData.add(costho2, costho2, costho2, no, no - noErr, no + noErr);
                 }
                 if (psie) {
                     double ne = ev.n(phi1, psie, a);
-                    double neErr = ev.sigman(phi1, psie, ne, a, aErr, phiErr, psiErr);
+                    double neErr = ev.sigman(phi1, psie, ne, a, 0, phiErr, psiErr);
                     double costhe2 = (ev.costh(phi1, ne)**2d).doubleValue();
                     eData.add(costhe2, costhe2, costhe2, ne, ne - neErr, ne + neErr);
                 }
@@ -176,13 +203,153 @@ class BirefView implements Initializable {
         eData.clear();
     }
 
-    private void clearFits() {
 
+    private void clearFits() {
+        oFit.clear();
+        eFit.clear();
+    }
+
+    /**
+     * Convert table to Data
+     * @return
+     */
+    private Tuple2 buildoData() {
+
+        List phi1Vals = new ArrayList()
+        List psioVals = new ArrayList()
+        for (TableData td : dataTable.items) {
+            if (td.phi1 && td.psio) {
+                phi1Vals << td.phi1 * Math.PI / 180
+                psioVals << td.psio * Math.PI / 180
+            }
+        }
+        return new Tuple2(new Vector(phi1Vals), new Vector(psioVals));
+    }
+
+    /**
+     * Convert table to Data
+     * @return
+     */
+    private Tuple2 buildeData() {
+
+        List phi1Vals = new ArrayList()
+        List psieVals = new ArrayList()
+        for (TableData td : dataTable.items) {
+            if (td.phi1 && td.psie) {
+                phi1Vals << td.phi1 * Math.PI / 180
+                psieVals << td.psie * Math.PI / 180
+            }
+        }
+        return new Tuple2(new Vector(phi1Vals), new Vector(psieVals));
     }
 
     @FXML
     public void onCalibrateClick(ActionEvent actionEvent) {
+        // check if calculation is in progress
+        message("Начинаем проверку калибровки по обыкновенной волне...")
+        def base;
+        def slope;
+        def chi2;
 
+        Vector phi1;
+        Vector psio;
+        (phi1, psio) = buildoData();
+
+        Vector nVector = ev.nVector(phi1, psio, getA());
+        Vector costhVector = ev.costhVector(phi1, nVector);
+        Vector sigmanVector = ev.sigmanVector(phi1, psio, nVector, getA(), 0, getPhiErr(), getPsiErr());
+        //calculating on the separate thread
+        progressIndicator.setVisible(true)
+        new Thread({
+            (base, slope, chi2) = ev.checkAdjustment(nVector, costhVector, sigmanVector)
+            Platform.runLater({
+                message("\tПри A = ${f(getA() * 180 / Math.PI)}" +
+                        ", phiErr = ${f(getPhiErr() * 180 / Math.PI)}" +
+                        ", psiErr = ${f(getPsiErr() * 180 / Math.PI)} " +
+                        "градусов получаем следующие параметры зависимости:\n" +
+                        "\tсмещение: ${f(base, 3)}, наклон: ${f(slope, 3)}, chi2 = ${f(chi2)}, количество степеней свободы: ${phi1.size() - 2}.")
+                if (Math.abs(slope) >= 0.02) {
+                    message("\tПлохая калибровка!");
+                }
+
+                if (chi2 / (phi1.size() - 2) < 0.5) {
+                    message("\tОшибки завышены!");
+                } else if (chi2 / (phi1.size() - 2) > 2) {
+                    message("\tОшибки занижены!");
+                }
+
+                oFit.clear();
+                for (double x = 0; x < costhVector.values().toList().max()**2; x += 0.005) {
+                    oFit.add(x, x * slope + base);
+                }
+
+                def no;
+                def noErr;
+                message("Вычисляем no как средне взвешенное для соответствющей серии измерений:")
+                (no, noErr) = ev.calculateno(nVector, sigmanVector);
+                message("\tno = ${f(no, 3)} \u00b1 ${f(noErr, 3)}")
+
+                outputPane.setExpanded(true)
+                progressIndicator.setVisible(false)
+            })
+        }).start()
+    }
+
+    @FXML
+    public void onAnalyzeClick(ActionEvent actionEvent) {
+        message("Начинаем расчет пe по необыкновенной волне...")
+
+
+        Vector phi1;
+        Vector psie;
+        (phi1, psie) = buildeData();
+
+        Vector nVector = ev.nVector(phi1, psie, getA());
+        Vector costhVector = ev.costhVector(phi1, nVector);
+        Vector sigmanVector = ev.sigmanVector(phi1, psie, nVector, getA(), 0, getPhiErr(), getPsiErr());
+        //calculating on the separate thread
+        progressIndicator.setVisible(true)
+        new Thread({
+            def func = { double costh2, double no, double ne -> 1 / Math.sqrt(costh2 / no**2 + (1 - costh2) / ne**2) }
+            def no, ne, neErr;
+
+            (no, ne, neErr) = ev.calculatene(nVector, costhVector, sigmanVector)
+
+            def chi2 = 0;
+            for (int i = 0; i < costhVector.size(); i++) {
+                chi2 += ((nVector[i] - func(costhVector[i], no, ne)) / sigmanVector[i])**2
+            }
+
+            Platform.runLater({
+                message("\tПри A = ${f(getA() * 180 / Math.PI)}" +
+                        ", phiErr = ${f(getPhiErr() * 180 / Math.PI)}" +
+                        ", psiErr = ${f(getPsiErr() * 180 / Math.PI)} " +
+                        "градусов получаем следующие результаты:\n" +
+                        "\tno = ${f(no, 3)}, ne = ${f(ne, 5)}, neErr = ${f(neErr, 5)}, chi2 = ${f(chi2)}, количество степеней свободы: ${phi1.size() - 2}.")
+
+                eFit.clear();
+                // link to formula in documentation
+                for (double x = 0; x < costhVector.values().toList().max()**2; x += 0.005) {
+                    eFit.add(x, func(x, no, ne));
+                }
+                outputPane.setExpanded(true)
+                progressIndicator.setVisible(false)
+            })
+        }).start()
+    }
+
+    private void message(String m) {
+        output.appendText(m);
+        output.appendText("\n")
+    }
+
+    /**
+     * Format number using 2 digits precision
+     * @param num
+     * @return
+     */
+    private String f(num, int digits = 2) {
+        return String.format("%.${digits}f", num);
     }
 
     @FXML
@@ -203,6 +370,10 @@ class BirefView implements Initializable {
         }
     }
 
+    /**
+     * Loading external file
+     * @param stream
+     */
     private void loadFile(InputStream stream) {
         stream.eachLine {
             if (!it.trim().startsWith("#") && !it.trim().isEmpty()) {
@@ -214,14 +385,14 @@ class BirefView implements Initializable {
     }
 
     @FXML
-    public void onAnalyzeClick(ActionEvent actionEvent) {}
-
-    @FXML
     public void onClearClick(ActionEvent actionEvent) {
         clearDataPlots()
         dataTable.items.clear()
     }
 
+    /**
+     * Support class for data table display
+     */
     public class TableData {
         Double phi1 = 0;
         Double psio = 0;

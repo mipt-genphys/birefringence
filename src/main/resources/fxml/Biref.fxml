@@ -3,18 +3,21 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
@@ -25,8 +28,12 @@
                 <Button fx:id="loadButton" mnemonicParsing="false" onAction="#onLoadClick" text="Загрузить" />
                 <Button mnemonicParsing="false" onAction="#onClearClick" text="Очистить" />
                 <Separator orientation="VERTICAL" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Separator orientation="VERTICAL" />
+            <ProgressIndicator fx:id="progressIndicator" prefHeight="25.0" prefWidth="25.0" visible="false" />
                 <Button fx:id="calibrateButton" mnemonicParsing="false" onAction="#onCalibrateClick" text="Проверить калибровку" />
                 <Button fx:id="analyzeButton" mnemonicParsing="false" onAction="#onAnalyzeClick" text="Провести анализ" />
+            <Separator orientation="VERTICAL" />
             </items>
         </ToolBar>
     </top>
@@ -37,24 +44,21 @@
                     <content>
                         <GridPane>
                             <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES" />
-                                <ColumnConstraints hgrow="SOMETIMES" />
+                                <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+                                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
                             </columnConstraints>
                             <rowConstraints>
-                                <RowConstraints vgrow="SOMETIMES" />
                                 <RowConstraints vgrow="SOMETIMES" />
                                 <RowConstraints vgrow="SOMETIMES" />
                                 <RowConstraints vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
                                 <Label text="A:" />
-                                <TextField fx:id="aField" text="38" GridPane.columnIndex="1" />
-                                <Label text="Aerr" GridPane.rowIndex="1" />
-                                <TextField fx:id="aErrField" text="1" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                <Label text="phiErr" GridPane.rowIndex="2" />
-                                <TextField fx:id="phiErrField" text="1" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                <Label text="psiErr" GridPane.rowIndex="3" />
-                                <TextField fx:id="psiErrField" text="1" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <Label text="phiErr" GridPane.rowIndex="1" />
+                                <Label text="psiErr" GridPane.rowIndex="2" />
+                        <Spinner fx:id="aField" editable="true" GridPane.columnIndex="1" />
+                        <Spinner fx:id="phiErrField" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Spinner fx:id="psiErrField" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                             </children>
                             <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -83,7 +87,7 @@
         <AnchorPane fx:id="chartPane" BorderPane.alignment="CENTER" />
     </center>
     <bottom>
-        <TitledPane expanded="false" text="Результаты и сообщения" BorderPane.alignment="BOTTOM_CENTER">
+        <TitledPane fx:id="outputPane" expanded="false" text="Результаты и сообщения" BorderPane.alignment="BOTTOM_CENTER">
             <content>
                 <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="150.0">
                     <content>

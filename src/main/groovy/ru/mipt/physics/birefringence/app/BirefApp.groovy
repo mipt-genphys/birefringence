@@ -16,6 +16,7 @@ class BirefApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Biref.fxml"));
 //        loader.setController(new BirefView());
         Parent parent = loader.load()
+        primaryStage.setTitle("Лабораторная работа 4.7.1: Двулучепреломление")
         primaryStage.setScene(new Scene(parent, 800, 600));
         primaryStage.show();
     }
