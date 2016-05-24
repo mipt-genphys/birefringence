@@ -1,6 +1,7 @@
 package ru.mipt.physics.birefringence
 
 import static java.lang.Math.*;
+import ru.mipt.physics.birefringence.Vector
 
 /**
  * Created by darksnake on 18-May-16.
@@ -22,11 +23,6 @@ class Evaluator {
 
     double costh(double phi1, double n) {
         return sin(phi1) / n;
-    }
-
-    double costh(double phi1, double psi, double a) {
-        double phi2 = psi - phi1 + a;
-
     }
 
     double sigman(double phi1, double psi, double n, double a, double aErr, double phi1Err, double psiErr) {
@@ -62,6 +58,7 @@ class Evaluator {
      * @param data
      * @return
      */
+    @Deprecated
     def checkAdjustment(Vector nVector, Vector costhVector, Vector sigmanVector) {
 
         double chi2Min = Double.MAX_VALUE;
@@ -86,14 +83,10 @@ class Evaluator {
     }
 
     /**
-     * calculating no
+     * calculating no as a weighted average
      * @param data
      */
-    def calculateno(Vector nVector, Vector sigmanVector) {
-
-//        Vector nVector = nVector(data.phi1, data.psio, data.a);
-//        Vector sigmanVector = sigmanVector(data.phi1, data.psio, nVector, data.a, data.aErr, data.phi1Err, data.psioErr);
-
+    def average(Vector nVector, Vector sigmanVector) {
         Vector weights = new Vector(sigmanVector.values().collect { 1 / it**2 })
         // weighted average
         double sum = (nVector * weights).values().sum()
@@ -103,11 +96,7 @@ class Evaluator {
         return new Tuple2<>(no, noErr)
     }
 
-    def calculatene(Vector nVector, Vector costhVector, Vector sigmanVector) {
-//        Vector nVector = nVector(data.phi1, data.psie, data.a);
-//        Vector sigmanVector = sigmanVector(data.phi1, data.psie, nVector, data.a, data.aErr, data.phi1Err, data.psieErr);
-//        Vector costhVector = costhVector(data.phi1, nVector)
-
+    def calculate(Vector nVector, Vector costhVector, Vector sigmanVector) {
         double[][] m = new double[2][2];//initialized with zeroes
         double b0 = 0;
         double b1 = 0;
@@ -127,9 +116,13 @@ class Evaluator {
         mInv[0][1] = -m[1][0] / det;
         mInv[1][0] = -m[0][1] / det;
         mInv[1][1] = m[0][0] / det;
-        def ne = 1 / sqrt(mInv[0][0] * b0 + mInv[0][1] * b1);
-        def no = 1 / sqrt(mInv[1][0] * b0 + mInv[1][1] * b1 + ne**(-2));
-        def neErr = sqrt(mInv[0][0]) * 0.5 * (mInv[0][0] * b0 + mInv[0][1] * b1)**(-3 / 2)
+
+        def base = mInv[0][0] * b0 + mInv[0][1] * b1;
+        def slope = mInv[1][0] * b0 + mInv[1][1] * b1;
+
+        def ne = 1 / sqrt(base);
+        def no = 1 / sqrt(slope + ne**(-2));
+        def neErr = sqrt(mInv[0][0]) * 0.5 * base **(-3 / 2)
         return new Tuple(no, ne, neErr);
     }
 

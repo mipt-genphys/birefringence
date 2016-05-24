@@ -6,31 +6,38 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'org.grooscript:grooscript-gradle-plugin:1.2.3'
+        //classpath 'org.grooscript:grooscript-gradle-plugin:1.2.3'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     }
 }
 
-apply plugin: 'application'
 apply plugin: 'groovy'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
 //apply plugin: 'org.grooscript.conversion'
 
-mainClassName = "ru.mipt.physics.birefringence.app.BirefApp"
+
 
 repositories {
     mavenCentral()
 }
+
+mainClassName = "ru.mipt.physics.birefringence.app.BirefApp"
 
 //grooscript {
 //    source = ['src/main/groovy/ru/mipt/physics/birefringence/']
 //}
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.6';
-//    compile 'org.grooscript:grooscript:1.2.3';
     //JFreeChart dependancies
     compile 'org.jfree:fxgraphics2d:1.3'
-    // http://mvnrepository.com/artifact/org.jfree/jfreesvg
-    compile group: 'org.jfree', name: 'jfreesvg', version: '3.1'
-
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    // http://mvnrepository.com/artifact/org.jfree/jfreesvg
+    //    compile group: 'org.jfree', name: 'jfreesvg', version: '3.1'
+
+
+    compile 'org.codehaus.groovy:groovy:2.4.6';
+    //    compile 'org.grooscript:grooscript:1.2.3';
+
 }

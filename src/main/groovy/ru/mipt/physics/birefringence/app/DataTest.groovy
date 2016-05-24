@@ -2,7 +2,6 @@ package ru.mipt.physics.birefringence.app
 
 import ru.mipt.physics.birefringence.Data
 import ru.mipt.physics.birefringence.Evaluator
-import ru.mipt.physics.birefringence.Vector
 
 
 /**
@@ -28,6 +27,6 @@ data.aErr = data.a/100;
 
 
 println(new Evaluator().checkAdjustment(data))
-println(new Evaluator().calculateno(data))
-println(new Evaluator().calculatene(data))
+println(new Evaluator().average(data))
+println(new Evaluator().calculate(data))
 

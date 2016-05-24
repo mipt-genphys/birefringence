@@ -7,15 +7,7 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
 import javafx.scene.Node
-import javafx.scene.control.Alert
-import javafx.scene.control.ProgressIndicator
-import javafx.scene.control.Spinner
-import javafx.scene.control.SpinnerValueFactory
-import javafx.scene.control.TableColumn
-import javafx.scene.control.TableView
-import javafx.scene.control.TextArea
-import javafx.scene.control.TextField
-import javafx.scene.control.TitledPane
+import javafx.scene.control.*
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.control.cell.TextFieldTableCell
 import javafx.scene.layout.AnchorPane
@@ -31,13 +23,10 @@ import org.jfree.data.xy.XYIntervalSeries
 import org.jfree.data.xy.XYIntervalSeriesCollection
 import org.jfree.data.xy.XYSeries
 import org.jfree.data.xy.XYSeriesCollection
-import ru.mipt.physics.birefringence.Data
 import ru.mipt.physics.birefringence.Evaluator
 import ru.mipt.physics.birefringence.Vector
-
 import java.awt.BasicStroke
 import java.awt.Color
-import java.awt.Stroke
 
 
 /**
@@ -74,6 +63,7 @@ class BirefView implements Initializable {
     private XYIntervalSeries oData = new XYIntervalSeries("oData");
     private XYIntervalSeries eData = new XYIntervalSeries("eData");
     private XYSeries oFit = new XYSeries("oFit");
+    private XYSeries oConstant = new XYSeries("oConstant");
     private XYSeries eFit = new XYSeries("eFit");
 
     @Override
@@ -140,11 +130,16 @@ class BirefView implements Initializable {
         XYSeriesCollection fitSeries = new XYSeriesCollection();
         fitSeries.addSeries(oFit)
         fitSeries.addSeries(eFit)
-        XYLineAndShapeRenderer lineRenderer =new XYLineAndShapeRenderer(true, false);
-        lineRenderer.setBaseStroke(new BasicStroke(2),false);
+        fitSeries.addSeries(oConstant)
+        XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
         plot.setRenderer(1, lineRenderer)
         lineRenderer.setSeriesPaint(0, Color.red)
+        lineRenderer.setSeriesStroke(0,new BasicStroke(2))
         lineRenderer.setSeriesPaint(1, Color.blue)
+        lineRenderer.setSeriesStroke(1,new BasicStroke(2))
+        lineRenderer.setSeriesPaint(2, Color.black)
+        lineRenderer.setSeriesStroke(2,new BasicStroke(2))
+
 
 
         plot.setDataset(0, dataSeries);
@@ -207,6 +202,7 @@ class BirefView implements Initializable {
     private void clearFits() {
         oFit.clear();
         eFit.clear();
+        oConstant.clear()
     }
 
     /**
@@ -246,10 +242,10 @@ class BirefView implements Initializable {
     @FXML
     public void onCalibrateClick(ActionEvent actionEvent) {
         // check if calculation is in progress
+        ln();
         message("Начинаем проверку калибровки по обыкновенной волне...")
-        def base;
-        def slope;
-        def chi2;
+
+
 
         Vector phi1;
         Vector psio;
@@ -261,7 +257,16 @@ class BirefView implements Initializable {
         //calculating on the separate thread
         progressIndicator.setVisible(true)
         new Thread({
-            (base, slope, chi2) = ev.checkAdjustment(nVector, costhVector, sigmanVector)
+            //TODO replace by actual line fit
+            def virtno, virtne, neErr;//it is no real no and ne. Just convenience to reuse existing method
+
+            (virtno, virtne, neErr) = ev.calculate(nVector, costhVector, sigmanVector)
+            def base = virtne;
+            def slope = virtno - virtne;
+
+
+            def chi2 = (((nVector - costhVector*slope - base)/sigmanVector)**2).values().sum();
+
             Platform.runLater({
                 message("\tПри A = ${f(getA() * 180 / Math.PI)}" +
                         ", phiErr = ${f(getPhiErr() * 180 / Math.PI)}" +
@@ -283,11 +288,18 @@ class BirefView implements Initializable {
                     oFit.add(x, x * slope + base);
                 }
 
-                def no;
+                def noConst;
                 def noErr;
+                ln();
                 message("Вычисляем no как средне взвешенное для соответствющей серии измерений:")
-                (no, noErr) = ev.calculateno(nVector, sigmanVector);
-                message("\tno = ${f(no, 3)} \u00b1 ${f(noErr, 3)}")
+                (noConst, noErr) = ev.average(nVector, sigmanVector);
+                def chi2const = (((nVector - base)/sigmanVector)**2).values().sum();
+                message("\tno = ${f(noConst, 3)} \u00b1 ${f(noErr, 3)}, chi2 = ${f(chi2const)}")
+
+                oConstant.clear();
+                for (double x = 0; x < costhVector.values().toList().max()**2; x += 0.005) {
+                    oConstant.add(x, noConst);
+                }
 
                 outputPane.setExpanded(true)
                 progressIndicator.setVisible(false)
@@ -297,6 +309,7 @@ class BirefView implements Initializable {
 
     @FXML
     public void onAnalyzeClick(ActionEvent actionEvent) {
+        ln();
         message("Начинаем расчет пe по необыкновенной волне...")
 
 
@@ -313,11 +326,11 @@ class BirefView implements Initializable {
             def func = { double costh2, double no, double ne -> 1 / Math.sqrt(costh2 / no**2 + (1 - costh2) / ne**2) }
             def no, ne, neErr;
 
-            (no, ne, neErr) = ev.calculatene(nVector, costhVector, sigmanVector)
+            (no, ne, neErr) = ev.calculate(nVector, costhVector, sigmanVector)
 
             def chi2 = 0;
             for (int i = 0; i < costhVector.size(); i++) {
-                chi2 += ((nVector[i] - func(costhVector[i], no, ne)) / sigmanVector[i])**2
+                chi2 += ((nVector[i] - func(costhVector[i]**2d, no, ne)) / sigmanVector[i])**2
             }
 
             Platform.runLater({
@@ -341,6 +354,10 @@ class BirefView implements Initializable {
     private void message(String m) {
         output.appendText(m);
         output.appendText("\n")
+    }
+
+    private void ln(){
+        output.appendText("==========================\n")
     }
 
     /**
@@ -387,6 +404,7 @@ class BirefView implements Initializable {
     @FXML
     public void onClearClick(ActionEvent actionEvent) {
         clearDataPlots()
+        clearFits()
         dataTable.items.clear()
     }
 

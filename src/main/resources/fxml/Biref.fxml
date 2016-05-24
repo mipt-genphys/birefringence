@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.mipt.physics.birefringence.app.BirefView">
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.mipt.physics.birefringence.app.BirefView">
     <top>
         <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
@@ -91,7 +91,7 @@
             <content>
                 <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="150.0">
                     <content>
-                        <TextArea fx:id="output">
+                        <TextArea fx:id="output" editable="false" wrapText="true">
                             <padding>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                             </padding>
