@@ -1,8 +1,11 @@
 package ru.mipt.physics.birefringence
 
+import groovy.transform.CompileStatic
+
 /**
  * Created by darksnake on 18-May-16.
  */
+@CompileStatic
 class Vector {
     private double[] values;
 
@@ -10,12 +13,13 @@ class Vector {
         this.values = values
     }
 
+
     Vector(List<Double> values) {
-        this.values = values.toArray()
+        this.values = values;
     }
 
 
-    def size() {
+    int size() {
         values.size();
     }
 
@@ -23,14 +27,22 @@ class Vector {
         return values[i];
     }
 
-    private Vector transform(Closure trans) {
+    private Vector transform(Closure<Double> trans) {
         double[] newValues = new double[size()];
         values.eachWithIndex { double entry, int i -> newValues[i] = trans(entry, i) }
         return new Vector(newValues);
     }
 
-    double[] values(){
+    double[] values() {
         return values;
+    }
+
+    /**
+     * Sum of vector values
+     * @return
+     */
+    double sum() {
+        return values.sum();
     }
 
     //Reloading operators to work with vectors
@@ -68,22 +80,22 @@ class Vector {
     }
 
     Vector power(Number number) {
-        return transform { double entry, int i -> entry**number }
+        return transform { double entry, int i -> Math.pow(entry, number.doubleValue())}
     }
 
     Vector negative() {
         return transform { double entry, int i -> -entry }
     }
 
-    Vector sin(){
+    Vector sin() {
         return transform { double entry, int i -> Math.sin(entry) }
     }
 
-    Vector cos(){
+    Vector cos() {
         return transform { double entry, int i -> Math.cos(entry) }
     }
 
-    Vector sqrt(){
+    Vector sqrt() {
         return transform { double entry, int i -> Math.sqrt(entry) }
     }
 }

@@ -68,6 +68,12 @@ class BirefView implements Initializable {
 
     @Override
     void initialize(URL location, ResourceBundle resources) {
+        //Action to clear output
+        MenuItem clearOutAction = new MenuItem("Очистить");
+        clearOutAction.setOnAction{event -> output.clear()}
+        output.setContextMenu(new ContextMenu(clearOutAction));
+
+
         phi1Column.setCellValueFactory(new PropertyValueFactory<TableData, Double>("phi1"));
         phi1Column.setCellFactory(TextFieldTableCell.<TableData, Double> forTableColumn(new DoubleStringConverter()));
         phi1Column.onEditCommit = { TableColumn.CellEditEvent<TableData, Double> event ->
@@ -134,11 +140,11 @@ class BirefView implements Initializable {
         XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
         plot.setRenderer(1, lineRenderer)
         lineRenderer.setSeriesPaint(0, Color.red)
-        lineRenderer.setSeriesStroke(0,new BasicStroke(2))
+        lineRenderer.setSeriesStroke(0, new BasicStroke(2))
         lineRenderer.setSeriesPaint(1, Color.blue)
-        lineRenderer.setSeriesStroke(1,new BasicStroke(2))
+        lineRenderer.setSeriesStroke(1, new BasicStroke(2))
         lineRenderer.setSeriesPaint(2, Color.black)
-        lineRenderer.setSeriesStroke(2,new BasicStroke(2))
+        lineRenderer.setSeriesStroke(2, new BasicStroke(2))
 
 
 
@@ -241,11 +247,9 @@ class BirefView implements Initializable {
 
     @FXML
     public void onCalibrateClick(ActionEvent actionEvent) {
-        // check if calculation is in progress
+        //TODO check if calculation is in progress
         ln();
         message("Начинаем проверку калибровки по обыкновенной волне...")
-
-
 
         Vector phi1;
         Vector psio;
@@ -257,15 +261,10 @@ class BirefView implements Initializable {
         //calculating on the separate thread
         progressIndicator.setVisible(true)
         new Thread({
-            //TODO replace by actual line fit
-            def virtno, virtne, neErr;//it is no real no and ne. Just convenience to reuse existing method
-
-            (virtno, virtne, neErr) = ev.calculate(nVector, costhVector, sigmanVector)
-            def base = virtne;
-            def slope = virtno - virtne;
-
-
-            def chi2 = (((nVector - costhVector*slope - base)/sigmanVector)**2).values().sum();
+            def fitResult = ev.fitLine(costhVector**2, nVector, sigmanVector)
+            def base = fitResult.base;
+            def slope = fitResult.slope;
+            def chi2 = fitResult.chi2;
 
             Platform.runLater({
                 message("\tПри A = ${f(getA() * 180 / Math.PI)}" +
@@ -293,8 +292,8 @@ class BirefView implements Initializable {
                 ln();
                 message("Вычисляем no как средне взвешенное для соответствющей серии измерений:")
                 (noConst, noErr) = ev.average(nVector, sigmanVector);
-                def chi2const = (((nVector - base)/sigmanVector)**2).values().sum();
-                message("\tno = ${f(noConst, 3)} \u00b1 ${f(noErr, 3)}, chi2 = ${f(chi2const)}")
+                def chi2const = (((nVector - base) / sigmanVector)**2).values().sum();
+                message("\tno = ${f(noConst, 3)} \u00b1 ${f(noErr, 3)}, chi2 = ${f(chi2const)}, количество степеней свободы: ${phi1.size() - 1}.")
 
                 oConstant.clear();
                 for (double x = 0; x < costhVector.values().toList().max()**2; x += 0.005) {
@@ -324,21 +323,21 @@ class BirefView implements Initializable {
         progressIndicator.setVisible(true)
         new Thread({
             def func = { double costh2, double no, double ne -> 1 / Math.sqrt(costh2 / no**2 + (1 - costh2) / ne**2) }
-            def no, ne, neErr;
 
-            (no, ne, neErr) = ev.calculate(nVector, costhVector, sigmanVector)
+            def fit = ev.calculate(nVector, costhVector, sigmanVector)
+            def no = fit.no;
+            def ne = fit.ne;
+            def noErr = fit.noErr;
+            def neErr = fit.neErr;
 
-            def chi2 = 0;
-            for (int i = 0; i < costhVector.size(); i++) {
-                chi2 += ((nVector[i] - func(costhVector[i]**2d, no, ne)) / sigmanVector[i])**2
-            }
+            def chi2 = fit.chi2;
 
             Platform.runLater({
                 message("\tПри A = ${f(getA() * 180 / Math.PI)}" +
                         ", phiErr = ${f(getPhiErr() * 180 / Math.PI)}" +
                         ", psiErr = ${f(getPsiErr() * 180 / Math.PI)} " +
                         "градусов получаем следующие результаты:\n" +
-                        "\tno = ${f(no, 3)}, ne = ${f(ne, 5)}, neErr = ${f(neErr, 5)}, chi2 = ${f(chi2)}, количество степеней свободы: ${phi1.size() - 2}.")
+                        "\tno = ${f(no, 3)}, noErr = ${f(noErr, 3)}, ne = ${f(ne, 4)}, neErr = ${f(neErr, 4)}, chi2 = ${f(chi2)}, количество степеней свободы: ${phi1.size() - 2}.")
 
                 eFit.clear();
                 // link to formula in documentation
@@ -356,7 +355,7 @@ class BirefView implements Initializable {
         output.appendText("\n")
     }
 
-    private void ln(){
+    private void ln() {
         output.appendText("==========================\n")
     }
 

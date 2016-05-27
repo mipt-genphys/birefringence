@@ -1,11 +1,14 @@
 package ru.mipt.physics.birefringence
 
+import groovy.transform.CompileStatic
+
 import static java.lang.Math.*;
 import ru.mipt.physics.birefringence.Vector
 
 /**
  * Created by darksnake on 18-May-16.
  */
+
 class Evaluator {
     Vector nVector(Vector phi1, Vector psi, double a) {
         Vector phi2 = psi - phi1 + a;
@@ -52,42 +55,41 @@ class Evaluator {
         return new Vector(res);
     }
 
-
-    /**
-     * Adjustment check
-     * @param data
-     * @return
-     */
-    @Deprecated
-    def checkAdjustment(Vector nVector, Vector costhVector, Vector sigmanVector) {
-
-        double chi2Min = Double.MAX_VALUE;
-        double minSlope = 0;
-        double minBase = 0;
-
-        //TODO replace by analytic solution
-        // Direct 2-parameter search
-        for (double base = 1; base < 2; base += 0.002) {
-            for (double slope = -0.2; slope < 0.2; slope += 0.002) {
-                def chi2 = (((nVector - costhVector**2 * slope - base) / sigmanVector)**2)// chi2 expression
-                        .values() // as double array
-                        .sum(); // sum of the array
-                if (chi2 < chi2Min) {
-                    chi2Min = chi2;
-                    minSlope = slope;
-                    minBase = base
-                }
-            }
-        }
-        return new Tuple<>(minBase, minSlope, chi2Min);
-    }
+//    /**
+//     * Adjustment check
+//     * @param data
+//     * @return
+//     */
+//    @Deprecated
+//    def checkAdjustment(Vector nVector, Vector costhVector, Vector sigmanVector) {
+//
+//        double chi2Min = Double.MAX_VALUE;
+//        double minSlope = 0;
+//        double minBase = 0;
+//
+//        //TODO replace by analytic solution
+//        // Direct 2-parameter search
+//        for (double base = 1; base < 2; base += 0.002) {
+//            for (double slope = -0.2; slope < 0.2; slope += 0.002) {
+//                def chi2 = (((nVector - costhVector**2 * slope - base) / sigmanVector)**2)// chi2 expression
+//                        .values() // as double array
+//                        .sum(); // sum of the array
+//                if (chi2 < chi2Min) {
+//                    chi2Min = chi2;
+//                    minSlope = slope;
+//                    minBase = base
+//                }
+//            }
+//        }
+//        return new Tuple<>(minBase, minSlope, chi2Min);
+//    }
 
     /**
      * calculating no as a weighted average
      * @param data
      */
     def average(Vector nVector, Vector sigmanVector) {
-        Vector weights = new Vector(sigmanVector.values().collect { 1 / it**2 })
+        Vector weights = sigmanVector**(-2)
         // weighted average
         double sum = (nVector * weights).values().sum()
         double weight = weights.values().sum()
@@ -96,34 +98,55 @@ class Evaluator {
         return new Tuple2<>(no, noErr)
     }
 
-    def calculate(Vector nVector, Vector costhVector, Vector sigmanVector) {
-        double[][] m = new double[2][2];//initialized with zeroes
-        double b0 = 0;
-        double b1 = 0;
-        for (int i = 0; i < nVector.size(); i++) {
-            def d1 = nVector[i]**6 / sigmanVector[i]**4 / 4d;
-            def d2 = (costhVector[i])**2
-            m[0][0] += d1
-            m[0][1] += d1 * d2
-            m[1][1] += d2 * d2 * d1;
-            b0 += d1 / nVector[i]**2;
-            b1 += d1 * d2 / nVector[i]**2;
-        }
-        m[1][0] = m[0][1]
+    /**
+     * Fit single line analytically using xs, ys and y sigmas
+     * @param xVector
+     * @param yVector
+     * @param sigmaVector
+     * @return
+     */
+    def fitLine(Vector xVector, Vector yVector, Vector sigmaVector) {
+        double[][] m = new double[2][2];
+
+        Vector invSigma2Vector = sigmaVector**(-2);
+
+        double b0 = (yVector * xVector * invSigma2Vector).sum();
+        double b1 = (yVector * invSigma2Vector).sum();
+        m[0][0] = ((xVector**2d) * invSigma2Vector).sum();
+        m[0][1] = (xVector * invSigma2Vector).sum();
+        m[1][0] = m[0][1];
+        m[1][1] = invSigma2Vector.sum();
         def det = m[0][0] * m[1][1] - m[1][0] * m[0][1];
-        double[][] mInv = new double[2][2];
+
+        double[][] mInv = new double[2][2];//covariance matrix
+
         mInv[0][0] = m[1][1] / det;
         mInv[0][1] = -m[1][0] / det;
         mInv[1][0] = -m[0][1] / det;
         mInv[1][1] = m[0][0] / det;
 
-        def base = mInv[0][0] * b0 + mInv[0][1] * b1;
-        def slope = mInv[1][0] * b0 + mInv[1][1] * b1;
+        def slope = mInv[0][0] * b0 + mInv[0][1] * b1;
+        def base = mInv[1][0] * b0 + mInv[1][1] * b1;
 
-        def ne = 1 / sqrt(base);
-        def no = 1 / sqrt(slope + ne**(-2));
-        def neErr = sqrt(mInv[0][0]) * 0.5 * base **(-3 / 2)
-        return new Tuple(no, ne, neErr);
+        double chi2 = (yVector**2d * invSigma2Vector).sum() + slope**2 * m[0][0] + base**2 * m[1][1] - 2 * slope * b0 - 2 * base * b1 + 2 * slope * base * m[0][1];
+        return ["base": base, "slope": slope, "chi2": chi2, "cov": mInv];
+    }
+
+    def calculate(Vector nVector, Vector costhVector, Vector sigmanVector) {
+
+        def fit = fitLine(costhVector**2d, nVector**(-2d), sigmanVector * 2d / (nVector**3d));
+
+        def base = fit.base;
+        def slope = fit.slope;
+        def cov = fit.cov;
+
+        def ne = 1d / sqrt(base);
+        def neErr = sqrt(cov[1][1]) * 0.5 * (ne**3);
+
+        def no = 1d / sqrt(slope + base);
+        def noErr = sqrt(cov[1][1] / 4d / base + cov[0][0] / 4d / abs(slope) + sqrt(cov[0][1] * cov[1][0] / base / abs(slope)) / 2d)
+
+        return ["no": no, "noErr": noErr, "ne": ne, "neErr": neErr, "chi2": fit.chi2];
     }
 
     /**

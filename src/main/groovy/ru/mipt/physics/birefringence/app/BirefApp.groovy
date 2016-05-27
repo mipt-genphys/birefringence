@@ -13,6 +13,7 @@ class BirefApp extends Application {
 
     @Override
     void start(Stage primaryStage) throws Exception {
+        Locale.setDefault(Locale.US);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Biref.fxml"));
 //        loader.setController(new BirefView());
         Parent parent = loader.load()
