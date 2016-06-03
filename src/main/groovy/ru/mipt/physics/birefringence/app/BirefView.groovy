@@ -70,7 +70,7 @@ class BirefView implements Initializable {
     void initialize(URL location, ResourceBundle resources) {
         //Action to clear output
         MenuItem clearOutAction = new MenuItem("Очистить");
-        clearOutAction.setOnAction{event -> output.clear()}
+        clearOutAction.setOnAction { event -> output.clear() }
         output.setContextMenu(new ContextMenu(clearOutAction));
 
 
@@ -117,8 +117,8 @@ class BirefView implements Initializable {
         psiErrField.valueProperty().addListener(listener);
 
         //initialize chart
-        NumberAxis xAxis = new NumberAxis("n");
-        NumberAxis yAxis = new NumberAxis("cos^2(theta)");
+        NumberAxis xAxis = new NumberAxis("cos^2(theta)");
+        NumberAxis yAxis = new NumberAxis("n");
         yAxis.setAutoRangeIncludesZero(false)
         XYPlot plot = new XYPlot(null, xAxis, yAxis, new XYErrorRenderer());
         JFreeChart chart = new JFreeChart(plot);
@@ -185,13 +185,13 @@ class BirefView implements Initializable {
             if (phi1) {
                 if (psio) {
                     double no = ev.n(phi1, psio, a);
-                    double noErr = ev.sigman(phi1, psio, no, a, 0, phiErr, psiErr);
+                    double noErr = ev.sigman(phi1, psio, no, a, phiErr, psiErr);
                     double costho2 = (ev.costh(phi1, no)**2d).doubleValue();
                     oData.add(costho2, costho2, costho2, no, no - noErr, no + noErr);
                 }
                 if (psie) {
                     double ne = ev.n(phi1, psie, a);
-                    double neErr = ev.sigman(phi1, psie, ne, a, 0, phiErr, psiErr);
+                    double neErr = ev.sigman(phi1, psie, ne, a, phiErr, psiErr);
                     double costhe2 = (ev.costh(phi1, ne)**2d).doubleValue();
                     eData.add(costhe2, costhe2, costhe2, ne, ne - neErr, ne + neErr);
                 }
@@ -257,7 +257,7 @@ class BirefView implements Initializable {
 
         Vector nVector = ev.nVector(phi1, psio, getA());
         Vector costhVector = ev.costhVector(phi1, nVector);
-        Vector sigmanVector = ev.sigmanVector(phi1, psio, nVector, getA(), 0, getPhiErr(), getPsiErr());
+        Vector sigmanVector = ev.sigmanVector(phi1, psio, nVector, getA(), getPhiErr(), getPsiErr());
         //calculating on the separate thread
         progressIndicator.setVisible(true)
         new Thread({
@@ -318,7 +318,7 @@ class BirefView implements Initializable {
 
         Vector nVector = ev.nVector(phi1, psie, getA());
         Vector costhVector = ev.costhVector(phi1, nVector);
-        Vector sigmanVector = ev.sigmanVector(phi1, psie, nVector, getA(), 0, getPhiErr(), getPsiErr());
+        Vector sigmanVector = ev.sigmanVector(phi1, psie, nVector, getA(), getPhiErr(), getPsiErr());
         //calculating on the separate thread
         progressIndicator.setVisible(true)
         new Thread({

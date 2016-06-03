@@ -28,19 +28,19 @@ class Evaluator {
         return sin(phi1) / n;
     }
 
-    double sigman(double phi1, double psi, double n, double a, double aErr, double phi1Err, double psiErr) {
+    double sigman(double phi1, double psi, double n, double a, double phi1Err, double psiErr) {
         double phi2 = psi - phi1 + a;
         def nal = (0.5 * sin(2 * phi1) - 0.5 * sin(2 * phi2) -
                 cos(a) * sin(phi1 - phi2)) / (2 * (n * sin(a)**2));
         def nb = -(sin(phi2) * cos(phi2) +
                 cos(a) * sin(phi1) * cos(phi2)) / (n * sin(a)**2);
-        def na = -(n * cos(a)) / sin(a) + (0.5 * sin(2 * phi2) +
-                sin(phi1) * cos(a + phi2)) / (n * sin(a)**2)
-        double res = sqrt((2 * phi1Err * nal)**2 + (nb * psiErr)**2 + (na * aErr)**2)
+//        def na = -(n * cos(a)) / sin(a) + (0.5 * sin(2 * phi2) +
+//                sin(phi1) * cos(a + phi2)) / (n * sin(a)**2)
+        double res = sqrt((2 * phi1Err * nal)**2 + (nb * psiErr)**2)
         return res;
     }
 
-    Vector sigmanVector(Vector phi1, Vector psi, Vector n, double a, double aErr, double phi1Err, double psiErr) {
+    Vector sigmanVector(Vector phi1, Vector psi, Vector n, double a,double phi1Err, double psiErr) {
         Vector phi2 = psi - phi1 + a;
         double[] res = new double[phi1.size()];
         for (int i = 0; i < phi1.size(); i++) {
@@ -48,9 +48,9 @@ class Evaluator {
                     cos(a) * sin(phi1[i] - phi2[i])) / (2 * (n[i] * sin(a)**2));
             def nb = -(sin(phi2[i]) * cos(phi2[i]) +
                     cos(a) * sin(phi1[i]) * cos(phi2[i])) / (n[i] * sin(a)**2);
-            def na = -(n[i] * cos(a)) / sin(a) + (0.5 * sin(2 * phi2[i]) +
-                    sin(phi1[i]) * cos(a + phi2[i])) / (n[i] * sin(a)**2)
-            res[i] = sqrt((2 * phi1Err * nal)**2 + (nb * psiErr)**2 + (na * aErr)**2)
+//            def na = -(n[i] * cos(a)) / sin(a) + (0.5 * sin(2 * phi2[i]) +
+//                    sin(phi1[i]) * cos(a + phi2[i])) / (n[i] * sin(a)**2)
+            res[i] = sqrt((2 * phi1Err * nal)**2 + (nb * psiErr)**2)
         }
         return new Vector(res);
     }
