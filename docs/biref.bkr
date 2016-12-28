@@ -1,0 +1,309 @@
+{
+    "beaker": "2",
+    "evaluators": [
+        {
+            "name": "HTML",
+            "plugin": "HTML",
+            "view": {
+                "cm": {
+                    "mode": "htmlmixed"
+                }
+            }
+        },
+        {
+            "name": "JavaScript",
+            "plugin": "JavaScript",
+            "view": {
+                "cm": {
+                    "mode": "javascript",
+                    "background": "#FFE0F0"
+                }
+            },
+            "languageVersion": "ES2015"
+        },
+        {
+            "name": "Groovy",
+            "plugin": "Groovy",
+            "imports": "graxxia.*\ncom.twosigma.beaker.NamespaceClient\ncom.twosigma.beaker.BeakerProgressUpdate\ncom.twosigma.beaker.chart.Color\ncom.twosigma.beaker.chart.GradientColor\ncom.twosigma.beaker.chart.legend.*\ncom.twosigma.beaker.chart.Filter\ncom.twosigma.beaker.chart.xychart.*\ncom.twosigma.beaker.chart.xychart.plotitem.*\ncom.twosigma.beaker.chart.categoryplot.*\ncom.twosigma.beaker.chart.categoryplot.plotitem.*\ncom.twosigma.beaker.chart.histogram.*\ncom.twosigma.beaker.chart.treemap.*\ncom.twosigma.beaker.chart.treemap.util.*\nnet.sf.jtreemap.swing.*\ncom.twosigma.beaker.chart.heatmap.HeatMap\ncom.twosigma.beaker.chart.KeyboardCodes\ncom.twosigma.beaker.jvm.object.*\ncom.twosigma.beaker.easyform.*\ncom.twosigma.beaker.easyform.formitem.*",
+            "view": {
+                "cm": {
+                    "mode": "groovy"
+                }
+            }
+        }
+    ],
+    "cells": [
+        {
+            "id": "codeeYorOJ",
+            "type": "code",
+            "evaluator": "Groovy",
+            "input": {
+                "body": [
+                    "import Math.*",
+                    "",
+                    "phi2func = { phi1,psi, a -> psi - phi1 + a}",
+                    "",
+                    "nfunc = {phi1, psi, a -> ",
+                    "  def phi2 = phi2func(phi1, psi, a)",
+                    "  return Math.sqrt(Math.sin(phi1)**2 + Math.sin(phi2)**2 + Math.sin(phi1) * Math.sin(phi2) * Math.cos(a) * 2) / Math.sin(a);",
+                    "}",
+                    "",
+                    "costhfunc = {phi1, n ->",
+                    "  return Math.sin(phi1) / n;",
+                    "}",
+                    "",
+                    "sigman = {phi1, psi, n, a, aErr, phi1Err, psiErr ->",
+                    "  def phi2 = phi2func(phi1, psi, a)",
+                    "  def nal = (0.5 * Math.sin(2 * phi1) - 0.5 * Math.sin(2 * phi2) -",
+                    "             Math.cos(a) * Math.sin(phi1 - phi2)) / (2 * (n * sin(a)**2));",
+                    "  def nb = -(Math.sin(phi2) * Math.cos(phi2) +",
+                    "             Math.cos(a) * Math.sin(phi1) * Math.cos(phi2)) / (n * Math.sin(a)**2);",
+                    "  def na = -(n * Math.cos(a)) / Math.sin(a) + (0.5 * Math.sin(2 * phi2) +",
+                    "                                     Math.sin(phi1) * cos(a + phi2)) / (n * Math.sin(a)**2)",
+                    "  double res = Math.sqrt((2 * phi1Err * nal)**2 + (nb * psiErr)**2 + (na * aErr)**2)",
+                    "  return res;",
+                    "}"
+                ]
+            },
+            "output": {
+                "state": {},
+                "result": "script1463860299557423996070$_run_closure4@7cad2b3a",
+                "selectedType": "Text",
+                "pluginName": "Groovy",
+                "shellId": "f8515c5d-ba45-4757-9e20-a64a7f6ef0d4",
+                "elapsedTime": 547,
+                "height": 36
+            },
+            "evaluatorReader": true,
+            "lineCount": 24
+        },
+        {
+            "id": "code2zpdKp",
+            "type": "code",
+            "evaluator": "Groovy",
+            "input": {
+                "body": [
+                    "//reading data",
+                    "data = new ArrayList<Map>();",
+                    "new File(\"..\\\\src\\\\main\\\\resources\\\\data.txt\").eachLine {",
+                    "         if (!it.trim().startsWith(\"#\") && !it.trim().isEmpty()) {",
+                    "           def values = it.trim().tokenize();",
+                    "           data.add([phi1: values.get(0).toDouble(), psio: values.get(1).toDouble(), psie: values.get(2).toDouble()]);",
+                    "         }",
+                    "}",
+                    "data"
+                ]
+            },
+            "output": {
+                "state": {},
+                "result": {
+                    "type": "BeakerDisplay",
+                    "innertype": "Error",
+                    "object": [
+                        "java.io.FileNotFoundException: ..\\src\\main\\resources\\data.txt (The system cannot find the path specified)\r<br/>",
+                        "\tat script14638605089531792739190.run(script14638605089531792739190.groovy:3)\r",
+                        "\tat com.twosigma.beaker.groovy.utils.GroovyEvaluator$workerThread$MyRunnable.run(GroovyEvaluator.java:378)\r",
+                        ""
+                    ]
+                },
+                "selectedType": "BeakerDisplay",
+                "pluginName": "Groovy",
+                "shellId": "f8515c5d-ba45-4757-9e20-a64a7f6ef0d4",
+                "elapsedTime": 544,
+                "height": 68
+            },
+            "evaluatorReader": true,
+            "lineCount": 9
+        },
+        {
+            "id": "codeHGy705",
+            "type": "code",
+            "evaluator": "Groovy",
+            "input": {
+                "body": [
+                    "a = 38*Math.PI/180",
+                    "",
+                    "Plot plot = new Plot();",
+                    "List costheta2o = new ArrayList();",
+                    "List no = new ArrayList();",
+                    "data.each{it->",
+                    "  def phi1 = it[\"phi1\"]*Math.PI/180",
+                    "  def psio = it[\"psio\"]*Math.PI/180",
+                    "  def n = nfunc(phi1,psio,a)",
+                    "  costheta2o << costhfunc(phi1,n)**2",
+                    "  no << n",
+                    "}",
+                    "plot << new Points(x: costheta2o, y: no)",
+                    "",
+                    "List costheta2e = new ArrayList();",
+                    "List ne = new ArrayList();",
+                    "data.each{it->",
+                    "  def phi1 = it[\"phi1\"]*Math.PI/180",
+                    "  def psie = it[\"psie\"]*Math.PI/180",
+                    "  def n = nfunc(phi1,psie,a)",
+                    "  costheta2e << costhfunc(phi1,n)**2",
+                    "  ne << n",
+                    "}",
+                    "plot << new Points(x: costheta2e, y: ne)"
+                ]
+            },
+            "output": {
+                "state": {},
+                "result": {
+                    "type": "Plot",
+                    "init_width": 640,
+                    "init_height": 480,
+                    "chart_title": null,
+                    "show_legend": null,
+                    "use_tool_tip": true,
+                    "legend_position": {
+                        "type": "LegendPosition",
+                        "position": "TOP_RIGHT"
+                    },
+                    "legend_layout": "VERTICAL",
+                    "domain_axis_label": null,
+                    "y_label": "",
+                    "rangeAxes": [
+                        {
+                            "type": "YAxis",
+                            "label": "",
+                            "auto_range": true,
+                            "auto_range_includes_zero": false,
+                            "lower_margin": 0.05,
+                            "upper_margin": 0.05,
+                            "lower_bound": 0,
+                            "upper_bound": 0,
+                            "use_log": false,
+                            "log_base": 10
+                        }
+                    ],
+                    "x_lower_margin": 0.05,
+                    "x_upper_margin": 0.05,
+                    "y_auto_range": true,
+                    "y_auto_range_includes_zero": false,
+                    "y_lower_margin": 0.05,
+                    "y_upper_margin": 0.05,
+                    "y_lower_bound": 0,
+                    "y_upper_bound": 0,
+                    "log_y": false,
+                    "timezone": null,
+                    "crosshair": null,
+                    "omit_checkboxes": false,
+                    "graphics_list": [
+                        {
+                            "type": "Points",
+                            "uid": "8774acfb-5ca0-4b18-8ab9-7c90d62d51d5",
+                            "visible": true,
+                            "yAxis": null,
+                            "hasClickAction": false,
+                            "x": [
+                                0.011141248511040234,
+                                0.02463756032043201,
+                                0.04337729585791467,
+                                0.06637687331691793,
+                                0.07932941749309783,
+                                0.09316201302175502,
+                                0.10746509299504561,
+                                0.12095357489489919,
+                                0.15355192516719243,
+                                0.18439367993255296,
+                                0.21694352613508208,
+                                0.24768012563559522,
+                                0.2794828911292846,
+                                0.3037853820608483,
+                                0.32823566903523327
+                            ],
+                            "y": [
+                                1.6451416566037773,
+                                1.6489116266773838,
+                                1.6421788231522725,
+                                1.640362618746925,
+                                1.6394133494243261,
+                                1.6381383300250751,
+                                1.6390145712632729,
+                                1.6492327371262352,
+                                1.6403626187469245,
+                                1.6466905241646175,
+                                1.6446770003744324,
+                                1.6459587226464945,
+                                1.638147555527303,
+                                1.6443424759448366,
+                                1.6401853542976181
+                            ],
+                            "display_name": "",
+                            "size": 6,
+                            "shape": "DEFAULT",
+                            "fill": null,
+                            "color": null,
+                            "outline_color": null
+                        },
+                        {
+                            "type": "Points",
+                            "uid": "df4bf48b-506a-4905-a133-fa807445081c",
+                            "visible": true,
+                            "yAxis": null,
+                            "hasClickAction": false,
+                            "x": [
+                                0.013826637772878255,
+                                0.030485116709533595,
+                                0.052781116254298405,
+                                0.08078628901360842,
+                                0.09619120741625677,
+                                0.1127619638226888,
+                                0.12842253729224135,
+                                0.14464651612191692,
+                                0.18152081471549777,
+                                0.21803127117526633,
+                                0.2524553611306711,
+                                0.28781806929133374,
+                                0.32431508164927625,
+                                0.34636185125069385,
+                                0.37353976300732855
+                            ],
+                            "y": [
+                                1.4767668581762747,
+                                1.4823552627192005,
+                                1.4887178623158377,
+                                1.4868920176166802,
+                                1.488805319059242,
+                                1.4889793986458235,
+                                1.4993254085950065,
+                                1.5081249067185099,
+                                1.5087048299742793,
+                                1.514347722554663,
+                                1.524620193444425,
+                                1.526882057271907,
+                                1.5207123015471402,
+                                1.539964414869585,
+                                1.5375080453238916
+                            ],
+                            "display_name": "",
+                            "size": 6,
+                            "shape": "DEFAULT",
+                            "fill": null,
+                            "color": null,
+                            "outline_color": null
+                        }
+                    ],
+                    "constant_lines": [],
+                    "constant_bands": [],
+                    "texts": [],
+                    "x_auto_range": true,
+                    "x_lower_bound": 0,
+                    "x_upper_bound": 0,
+                    "log_x": false,
+                    "x_log_base": 10,
+                    "tips": {}
+                },
+                "selectedType": "Plot",
+                "pluginName": "Groovy",
+                "shellId": "f8515c5d-ba45-4757-9e20-a64a7f6ef0d4",
+                "elapsedTime": 554,
+                "height": 502
+            },
+            "evaluatorReader": true,
+            "lineCount": 24
+        }
+    ],
+    "namespace": {}
+}
