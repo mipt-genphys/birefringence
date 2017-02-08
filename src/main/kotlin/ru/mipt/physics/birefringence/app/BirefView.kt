@@ -1,10 +1,10 @@
 package ru.mipt.physics.birefringence.app
 
+import javafx.beans.binding.Bindings
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.scene.control.*
 import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.BorderPane
 import javafx.stage.FileChooser
 import javafx.util.converter.DoubleStringConverter
 import org.jfree.chart.JFreeChart
@@ -24,13 +24,14 @@ import java.awt.BasicStroke
 import java.awt.Color
 import java.io.InputStream
 import java.util.*
+import java.util.concurrent.Callable
 import java.util.regex.Pattern
 
 /**
  * Created by darksnake on 28-Dec-16.
  */
 class BirefView : View("Biref") {
-    override val root: BorderPane by fxml(location = "/fxml/Biref.fxml")
+    override val root: SplitPane by fxml(location = "/fxml/Biref.fxml")
 
 
     /**
@@ -64,8 +65,15 @@ class BirefView : View("Biref") {
     val oConstant: XYSeries = XYSeries("oConstant");
     val eFit: XYSeries = XYSeries("eFit");
 
+    val calibrateButton: Button by fxid()
+    val analyzeButton: Button by fxid()
+
 
     init {
+        primaryStage.minHeight = 600.0;
+        primaryStage.minWidth = 800.0;
+        title = "Лабораторная работа \"Двулучепреломление\""
+
         //Action to clear output
         val clearOutAction = MenuItem("Очистить");
         clearOutAction.setOnAction { event -> output.clear() }
@@ -73,18 +81,18 @@ class BirefView : View("Biref") {
 
         with(dataTable) {
             isEditable = true
-            column("phi1", TableData::phi1).useTextField(DoubleStringConverter()){
+            column("phi1", TableData::phi1).useTextField(DoubleStringConverter()) {
                 it.rowValue.phi1 = it.newValue;
                 if (dataTable.items[dataTable.items.size - 1].phi1 > 0) {
                     dataTable.items.add(TableData())
                 }
                 updateChartData();
             }
-            column("psio", TableData::psio).useTextField(DoubleStringConverter()){
+            column("psio", TableData::psio).useTextField(DoubleStringConverter()) {
                 it.rowValue.psio = it.newValue;
                 updateChartData();
             }
-            column("psie", TableData::psie).useTextField(DoubleStringConverter()){
+            column("psie", TableData::psie).useTextField(DoubleStringConverter()) {
                 it.rowValue.psie = it.newValue;
                 updateChartData();
             }
@@ -137,7 +145,14 @@ class BirefView : View("Biref") {
         plot.setDataset(0, dataSeries);
         plot.setDataset(1, fitSeries)
         //Debug mode
-        loadFile(resources.stream("/data.txt")!!);
+        if (System.getProperty("testRun") == "true") {
+            log.info("Loading debug dataset")
+            loadFile(resources.stream("/data.txt")!!);
+        } else {
+            initData()
+        }
+        calibrateButton.disableProperty().bind(Bindings.createBooleanBinding(Callable<Boolean> { buildoData().first.size() < 2 }, dataTable.items));
+        analyzeButton.disableProperty().bind(Bindings.createBooleanBinding(Callable<Boolean> { buildeData().first.size() < 2 }, dataTable.items));
     }
 
     private fun getA(): Double {
@@ -341,15 +356,39 @@ class BirefView : View("Biref") {
     fun onLoadClick() {
         val chooser = FileChooser();
         val file = chooser.showOpenDialog(primaryStage.scene.window);
-        clearDataPlots()
-        dataTable.items.clear()
-        try {
-            loadFile(file.inputStream())
-        } catch (ex: Exception) {
-            val alert = Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Не удалось загруить файл с данными")
-            alert.setContentText("Проверьте что загружается файл в правильном формате")
-            alert.show();
+        if (file != null) {
+            clearDataPlots()
+            dataTable.items.clear()
+            try {
+                runAsync {
+                    loadFile(file.inputStream())
+                }
+            } catch (ex: Exception) {
+                val alert = Alert(Alert.AlertType.ERROR);
+                alert.headerText = "Не удалось загруить файл с данными"
+                alert.contentText = "Проверьте что загружается файл в правильном формате"
+                alert.show();
+            }
+        }
+    }
+
+    fun onSaveClick() {
+        val chooser = FileChooser();
+        chooser.initialFileName = "biref.txt"
+        val file = chooser.showSaveDialog(primaryStage.scene.window);
+        if (file != null) {
+            runAsync {
+                file.writer().use { wr ->
+                    wr.appendln("#\tphi1\tpsio\tpsie");
+                    dataTable.items.forEach { item ->
+                        wr.appendln("\t${item.phi1}\t${item.psio}\t${item.psie}")
+                    }
+                }
+            } ui {
+                val alert = Alert(Alert.AlertType.INFORMATION);
+                alert.headerText = "Данные сохранены"
+                alert.show();
+            }
         }
     }
 
@@ -360,7 +399,7 @@ class BirefView : View("Biref") {
     private fun loadFile(stream: InputStream) {
         stream.reader().forEachLine {
             if (!it.trim().startsWith("#") && !it.trim().isEmpty()) {
-                val values = it.trim().split("\t")
+                val values = it.trim().split(Pattern.compile("\\s+"))
                 dataTable.items.add(TableData(phi1 = values[0].toDouble(), psio = values[1].toDouble(), psie = values[2].toDouble()));
             }
         }
@@ -371,6 +410,14 @@ class BirefView : View("Biref") {
         clearDataPlots()
         clearFits()
         dataTable.items.clear()
+        initData()
     }
 
+    private fun initData() {
+        dataTable.items.add(TableData())
+    }
+
+    fun onHelpClick() {
+        HelpFragment().openWindow(owner = primaryStage.scene.window, escapeClosesWindow = true)
+    }
 }

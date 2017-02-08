@@ -44,3 +44,11 @@ dependencies {
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
     testCompile'org.codehaus.groovy:groovy-all:2.4.+'
 }
+
+task debug(type: JavaExec){
+    group = "application"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "ru.mipt.physics.birefringence.app.BirefApp"
+    // arguments to pass to the application
+    args '--test'
+}
