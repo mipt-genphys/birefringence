@@ -1,4 +1,4 @@
-package ru.mipt.physics.birefringence.app
+package ru.mipt.physics.biref
 
 import javafx.beans.binding.Bindings
 import javafx.beans.value.ChangeListener
@@ -17,8 +17,6 @@ import org.jfree.data.xy.XYIntervalSeries
 import org.jfree.data.xy.XYIntervalSeriesCollection
 import org.jfree.data.xy.XYSeries
 import org.jfree.data.xy.XYSeriesCollection
-import ru.mipt.physics.birefringence.*
-import ru.mipt.physics.birefringence.Vector
 import tornadofx.*
 import java.awt.BasicStroke
 import java.awt.Color
@@ -147,7 +145,7 @@ class BirefView : View("Biref") {
         //Debug mode
         if (System.getProperty("testRun") == "true") {
             log.info("Loading debug dataset")
-            loadFile(resources.stream("/data.txt")!!);
+            loadFile(resources.stream("/data.txt"));
         } else {
             initData()
         }
@@ -220,7 +218,7 @@ class BirefView : View("Biref") {
                 psioVals.add(td.psio * Math.PI / 180)
             }
         }
-        return Pair(Vector(phi1Vals.toTypedArray()), Vector(psioVals.toTypedArray()));
+        return Pair(Vector(phi1Vals.toDoubleArray()), Vector(psioVals.toDoubleArray()));
     }
 
     /**
@@ -236,7 +234,7 @@ class BirefView : View("Biref") {
                 psieVals.add(td.psie * Math.PI / 180)
             }
         }
-        return Pair(Vector(phi1Vals.toTypedArray()), Vector(psieVals.toTypedArray()));
+        return Pair(Vector(phi1Vals.toDoubleArray()), Vector(psieVals.toDoubleArray()));
     }
 
     fun onCalibrateClick() {
@@ -310,7 +308,7 @@ class BirefView : View("Biref") {
             val sigmanVector = sigmanVector(phi1, psie, nVector, getA(), getPhiErr(), getPsiErr());
             val fitRes = calculate(nVector, costhVector, sigmanVector);
             //result, ndf, max cos^2
-            Triple<NFitResult, Int, Double>(fitRes, phi1.size() - 2, costhVector.values.max()!!.sqr());
+            Triple(fitRes, phi1.size() - 2, costhVector.values.max() ?: 0.0.sqr());
         } ui {
             val (no, noErr, ne, neErr, chi2) = it.first //destructuring declaration of NFitResult
             val func = { costh2: Double, no: Double, ne: Double -> 1.0 / Math.sqrt(costh2 / no.sqr() + (1 - costh2) / ne.sqr()) }

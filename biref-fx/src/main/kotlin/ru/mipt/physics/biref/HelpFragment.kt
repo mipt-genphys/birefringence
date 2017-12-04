@@ -1,8 +1,7 @@
-package ru.mipt.physics.birefringence.app
+package ru.mipt.physics.biref
 
 import javafx.scene.web.WebView
-import tornadofx.Fragment
-import tornadofx.anchorpane
+import tornadofx.*
 
 /**
  * Created by darksnake on 08-Feb-17.

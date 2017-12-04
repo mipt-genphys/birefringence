@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<SplitPane dividerPositions="0.5" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <items>
+      <VBox prefHeight="200.0" prefWidth="100.0">
+         <children>
+            <SplitPane dividerPositions="0.25125628140703515" VBox.vgrow="ALWAYS">
+               <items>
+                    <VBox maxHeight="1.7976931348623157E308" maxWidth="400.0" minWidth="-Infinity" prefWidth="250.0">
+                        <children>
+                            <TitledPane alignment="CENTER" text="Параметры">
+                                <content>
+                                    <GridPane>
+                                        <columnConstraints>
+                                            <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
+                                            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" />
+                                        </columnConstraints>
+                                        <rowConstraints>
+                                            <RowConstraints vgrow="SOMETIMES" />
+                                            <RowConstraints vgrow="SOMETIMES" />
+                                            <RowConstraints vgrow="SOMETIMES" />
+                                        </rowConstraints>
+                                        <children>
+                                            <Label text="A:" />
+                                            <Label text="phiErr" GridPane.rowIndex="1" />
+                                            <Label text="psiErr" GridPane.rowIndex="2" />
+                                    <Spinner fx:id="aField" editable="true" GridPane.columnIndex="1" />
+                                    <Spinner fx:id="phiErrField" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Spinner fx:id="psiErrField" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        </children>
+                                        <padding>
+                                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                        </padding>
+                                    </GridPane>
+                                </content>
+                            </TitledPane>
+                        <ToolBar>
+                           <items>
+                                  <Button fx:id="loadButton" mnemonicParsing="false" onAction="#onLoadClick" text="Загрузить" />
+                              <Button fx:id="saveButton" mnemonicParsing="false" onAction="#onSaveClick" text="Сохранить" />
+                                  <Button mnemonicParsing="false" onAction="#onClearClick" text="Очистить" />
+                           </items>
+                        </ToolBar>
+                            <TitledPane alignment="CENTER" collapsible="false" maxHeight="1.7976931348623157E308" text="Данные" VBox.vgrow="ALWAYS">
+                                <content>
+                                    <TableView fx:id="dataTable" editable="true">
+                                        <!--
+                                                                    <columns>
+                                                                                    <TableColumn fx:id="phi1Column" prefWidth="75.0" text="phi1" />
+                                                                                    <TableColumn fx:id="psioColumn" prefWidth="75.0" sortable="false" text="psio" />
+                                                                                    <TableColumn fx:id="psieColumn" prefWidth="75.0" sortable="false" text="psie" />
+                                                                                </columns>
+                                                    -->
+                                        <columnResizePolicy>
+                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                        </columnResizePolicy>
+                                    </TableView>
+                                </content>
+                            </TitledPane>
+                        </children>
+                    </VBox>
+                    <AnchorPane fx:id="chartPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="500.0" />
+               </items>
+            </SplitPane>
+              <ToolBar>
+                  <items>
+                      <Button fx:id="calibrateButton" mnemonicParsing="false" onAction="#onCalibrateClick" text="Проверить калибровку" />
+                      <Button fx:id="analyzeButton" mnemonicParsing="false" onAction="#onAnalyzeClick" text="Провести анализ" />
+                  <Separator orientation="VERTICAL" />
+                  <ProgressIndicator fx:id="progressIndicator" prefHeight="25.0" prefWidth="25.0" visible="false" />
+                  <Pane HBox.hgrow="ALWAYS" />
+                  <Separator orientation="VERTICAL" />
+                  <Button fx:id="helpButton" mnemonicParsing="false" onAction="#onHelpClick" text="Справка" />
+                  </items>
+              </ToolBar>
+         </children>
+      </VBox>
+        <TitledPane fx:id="outputPane" expanded="false" text="Результаты и сообщения">
+            <content>
+                <ScrollPane fitToHeight="true" fitToWidth="true" minViewportHeight="100.0" prefViewportHeight="500.0">
+                    <content>
+                        <TextArea fx:id="output" editable="false" wrapText="true">
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                            </padding>
+                        </TextArea>
+                    </content>
+                </ScrollPane>
+            </content>
+        </TitledPane>
+   </items>
+</SplitPane>

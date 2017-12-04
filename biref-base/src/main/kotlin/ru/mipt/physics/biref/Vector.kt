@@ -1,9 +1,14 @@
-package ru.mipt.physics.birefringence
+package ru.mipt.physics.biref
+
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * Created by darksnake on 08-Jun-16.
  */
-class Vector(val values: Array<Double>) {
+class Vector(val values: DoubleArray) {
 
     fun size(): Int {
         return values.size;
@@ -14,7 +19,7 @@ class Vector(val values: Array<Double>) {
     }
 
     private fun transform(trans: (Double, Int) -> Double): Vector {
-        val newValues = Array<Double>(size()) { i -> trans(values[i], i) };
+        val newValues = DoubleArray(size()) { i -> trans(values[i], i) };
         return Vector(newValues);
     }
 
@@ -23,11 +28,7 @@ class Vector(val values: Array<Double>) {
      * @return
      */
     fun sum(): Double {
-        var res = 0.0;
-        for (v in values) {
-            res += v;
-        }
-        return res;
+        return values.sum();
     }
 
     //Reloading operators to work with vectors
@@ -65,22 +66,17 @@ class Vector(val values: Array<Double>) {
     }
 
     infix fun pow(pow: Number): Vector {
-        return transform { entry, i -> Math.pow(entry, pow.toDouble()) }
+        return transform { entry, i -> entry.pow(pow.toDouble()) }
     }
 
     operator fun unaryMinus(): Vector {
         return transform { entry, i -> -entry }
     }
 
-    fun sin(): Vector {
-        return transform { entry, i -> Math.sin(entry) }
-    }
+    val sin: Vector get() = transform { entry, i -> sin(entry) }
 
-    fun cos(): Vector {
-        return transform { entry, i -> Math.cos(entry) }
-    }
+    val cos: Vector get() = transform { entry, i -> cos(entry) }
 
-    fun sqrt(): Vector {
-        return transform { entry, i -> Math.sqrt(entry) }
-    }
+    val sqrt: Vector get() = transform { entry, i -> sqrt(entry) }
+
 }

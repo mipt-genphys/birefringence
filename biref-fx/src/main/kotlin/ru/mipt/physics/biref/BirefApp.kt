@@ -1,7 +1,7 @@
-package ru.mipt.physics.birefringence.app
+package ru.mipt.physics.biref
 
 import javafx.stage.Stage
-import tornadofx.App
+import tornadofx.*
 
 /**
  * Created by darksnake on 28-Dec-16.

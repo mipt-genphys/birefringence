@@ -1,0 +1,51 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "2.0.1"
+    id "application"
+}
+
+group 'ru.mipt.physics'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'kotlin-platform-jvm'
+
+mainClassName = "ru.mipt.physics.biref.BirefApp"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    compile project(":biref-base")
+
+    // https://mvnrepository.com/artifact/org.jfree/jfreechart-fx
+    compile group: 'org.jfree', name: 'jfreechart-fx', version: '1.0.0'
+
+    // https://mvnrepository.com/artifact/no.tornado/tornadofx
+    compile group: 'no.tornado', name: 'tornadofx', version: '1.7.12'
+
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-reflect
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.2.0'
+    expectedBy project(":biref-base")
+
+    testCompile "junit:junit:4.12"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+
+task debug(type: JavaExec) {
+    group = "application"
+    classpath = sourceSets.main.runtimeClasspath
+    main = "ru.mipt.physics.birefringence.app.BirefApp"
+    // arguments to pass to the application
+    args['--test']
+}

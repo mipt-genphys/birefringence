@@ -1,54 +1,7 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.2.0" apply false
+}
+
+
 group 'ru.mipt.physics'
 version '1.0-SNAPSHOT'
-
-buildscript {
-    ext.kotlin_version = '1.0.6'
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        //classpath 'org.grooscript:grooscript-gradle-plugin:1.2.3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-    }
-}
-
-apply plugin: 'kotlin'
-apply plugin: 'application'
-apply plugin: 'com.github.johnrengelman.shadow'
-
-//apply plugin: 'org.grooscript.conversion'
-
-
-
-repositories {
-    mavenCentral()
-}
-
-mainClassName = "ru.mipt.physics.birefringence.app.BirefApp"
-
-
-dependencies {
-    //JFreeChart dependancies
-    compile 'org.jfree:fxgraphics2d:1.3'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
-    // kotlin build dependancies
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile('no.tornado:tornadofx:1.5.9'){
-        transitive = false
-    }
-
-
-    //test dependancies
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-    testCompile'org.codehaus.groovy:groovy-all:2.4.+'
-}
-
-task debug(type: JavaExec){
-    group = "application"
-    classpath = sourceSets.main.runtimeClasspath
-    main = "ru.mipt.physics.birefringence.app.BirefApp"
-    // arguments to pass to the application
-    args '--test'
-}
