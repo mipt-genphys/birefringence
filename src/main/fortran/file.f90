@@ -1,7 +1,7 @@
 program obr
 implicit none
 real fi1(40), sigmafi1, psio(40), sigmapsio, psie(40), sigmapsie, A, sigmaA, NUM, psiomin, psiemin, fi1o, fi1e !входные данные
-real n(40), costh(40), sigman(40), fi2o(40), fi2e(40) !данные из входных
+real n(40), cosTheta(40), nErr(40), fi2o(40), fi2e(40) !данные из входных
 real X2, k, mink, minX2, flag, sum1, sum2, nal, nb, na, PI, M(2,2), OM(2,2), b0, b1, detM, k0  !вспомогательные переменные
 real no, sigmano, ne, sigmane !выходные данные
 integer i, j, l
@@ -99,11 +99,11 @@ fi1e = fi1e*PI/180
 if(flag == 0) then
   do i = 1,NUM
     n(i) = sqrt((sin(fi1(i)))**2+(sin(fi2o(i)))**2+(2*sin(fi1(i))*sin(fi2o(i))*cos(A)))/sin(A)
-    costh(i) = sin(fi1(i))/n(i)
+    cosTheta(i) = sin(fi1(i))/n(i)
     nal = (0.5*sin(2*fi1(i)) - 0.5*sin(2*fi2o(i)) - cos(A)*sin(fi1(i)-fi2o(i)))/(2*(n(i)*sin(A)**2))
 	nb = -(sin(fi2o(i))*cos(fi2o(i)) + cos(A)*sin(fi1(i))*cos(fi2o(i)))/(n(i)*sin(A)**2)
 	na = -(n(i)*cos(A))/sin(A) + (0.5*sin(2*fi2o(i)) + sin(fi1(i))*cos(A+fi2o(i)))/(n(i)*sin(A)**2)
-    sigman(i) = sqrt((2*sigmafi1*nal)**2 + (nb*sigmapsio)**2 + (na*sigmaA)**2)
+    nErr(i) = sqrt((2*sigmafi1*nal)**2 + (nb*sigmapsio)**2 + (na*sigmaA)**2)
   end do
   k0 = 0
   do l = 1, 1000
@@ -111,7 +111,7 @@ if(flag == 0) then
     do j = 1, 1000
       X2 = 0
       do i = 1,NUM
-        X2 = X2 + ((n(i) - k*(costh(i)**2)- k0)/sigman(i))**2
+        X2 = X2 + ((n(i) - k*(cosTheta(i)**2)- k0)/nErr(i))**2
       end do
       if(minX2 == 0) then
         minX2 = X2
@@ -139,17 +139,17 @@ if(flag == 1) then
   !подсчет no
   do i = 1,NUM
     n(i) = sqrt((sin(fi1(i)))**2+(sin(fi2o(i)))**2+(2*sin(fi1(i))*sin(fi2o(i))*cos(A)))/sin(A)
-    costh(i) = sin(fi1(i))/n(i)
+    cosTheta(i) = sin(fi1(i))/n(i)
     nal = (0.5*sin(2*fi1(i)) - 0.5*sin(2*fi2o(i)) - cos(A)*sin(fi1(i)-fi2o(i)))/(2*(n(i)*sin(A)**2))
     nb = -(sin(fi2o(i))*cos(fi2o(i)) + cos(A)*sin(fi1(i))*cos(fi2o(i)))/(n(i)*sin(A)**2)
     na = -(n(i)*cos(A))/sin(A) + (0.5*sin(2*fi2o(i)) + sin(fi1(i))*cos(A+fi2o(i)))/(n(i)*sin(A)**2)
-    sigman(i) = sqrt((2*sigmafi1*nal)**2 + (nb*sigmapsio)**2 + (na*sigmaA)**2)
+    nErr(i) = sqrt((2*sigmafi1*nal)**2 + (nb*sigmapsio)**2 + (na*sigmaA)**2)
   end do
   sum1 = 0
   sum2 = 0
   do i = 1,NUM
-     sum1 = sum1 + n(i)/(sigman(i)**2)
-     sum2 = sum2 + 1/(sigman(i)**2)
+     sum1 = sum1 + n(i)/(nErr(i)**2)
+     sum2 = sum2 + 1/(nErr(i)**2)
   end do
   no = sum1/sum2
   sigmano = sqrt(1/sum2)
@@ -161,13 +161,13 @@ if(flag == 1) then
     nal = (0.5*sin(2*fi1(i)) - 0.5*sin(2*fi2e(i)) - cos(A)*sin(fi1(i)-fi2e(i)))/(2*(n(i)*sin(A)**2))
     nb = -(sin(fi2e(i))*cos(fi2e(i)) + cos(A)*sin(fi1(i))*cos(fi2e(i)))/(n(i)*sin(A)**2)
     na = -(n(i)*cos(A))/sin(A) + (0.5*sin(2*fi2e(i)) + sin(fi1(i))*cos(A+fi2e(i)))/(n(i)*sin(A)**2)
-    sigman(i) = sqrt((2*sigmafi1*nal)**2 + (nb*sigmapsie)**2 + (na*sigmaA)**2)
-    M(1,1) = M(1,1) + 1/(2*sigman(i)/(n(i)**3))**2
-    M(1,2) = M(1,2) + (sin(fi1(i))/n(i))**2/(2*sigman(i)/(n(i)**3))**2
-    M(2,1) = M(2,1) + (sin(fi1(i))/n(i))**2/(2*sigman(i)/(n(i)**3))**2
-    M(2,2) = M(2,2) + (sin(fi1(i))/n(i))**4/(2*sigman(i)/(n(i)**3))**2
-    b0 = b0 + (n(i)**(-2))/(2*sigman(i)/(n(i)**3))**2
-    b1 = b1 + (n(i)**(-2))*(sin(fi1(i))/n(i))**2/(2*sigman(i)/(n(i)**3))**2
+    nErr(i) = sqrt((2*sigmafi1*nal)**2 + (nb*sigmapsie)**2 + (na*sigmaA)**2)
+    M(1,1) = M(1,1) + 1/(2*nErr(i)/(n(i)**3))**2
+    M(1,2) = M(1,2) + (sin(fi1(i))/n(i))**2/(2*nErr(i)/(n(i)**3))**2
+    M(2,1) = M(2,1) + (sin(fi1(i))/n(i))**2/(2*nErr(i)/(n(i)**3))**2
+    M(2,2) = M(2,2) + (sin(fi1(i))/n(i))**4/(2*nErr(i)/(n(i)**3))**2
+    b0 = b0 + (n(i)**(-2))/(2*nErr(i)/(n(i)**3))**2
+    b1 = b1 + (n(i)**(-2))*(sin(fi1(i))/n(i))**2/(2*nErr(i)/(n(i)**3))**2
   end do
   detM = M(1,1)*M(2,2)-M(2,1)*M(1,2)
   OM(1,1) = M(2,2)/detM

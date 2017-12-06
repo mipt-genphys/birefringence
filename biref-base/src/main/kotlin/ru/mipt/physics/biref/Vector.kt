@@ -38,7 +38,7 @@ class Vector(val values: DoubleArray) {
     }
 
     operator fun plus(number: Number): Vector {
-        return transform { entry, i -> entry + number.toDouble() }
+        return transform { entry, _ -> entry + number.toDouble() }
     }
 
     operator fun minus(other: Vector): Vector {
@@ -46,7 +46,7 @@ class Vector(val values: DoubleArray) {
     }
 
     operator fun minus(number: Number): Vector {
-        return transform { entry, i -> entry - number.toDouble() }
+        return transform { entry, _ -> entry - number.toDouble() }
     }
 
     operator fun times(other: Vector): Vector {
@@ -54,7 +54,7 @@ class Vector(val values: DoubleArray) {
     }
 
     operator fun times(number: Number): Vector {
-        return transform { entry, i -> entry * number.toDouble() }
+        return transform { entry, _ -> entry * number.toDouble() }
     }
 
     operator fun div(other: Vector): Vector {
@@ -62,21 +62,21 @@ class Vector(val values: DoubleArray) {
     }
 
     operator fun div(number: Number): Vector {
-        return transform { entry, i -> entry / number.toDouble() }
+        return transform { entry, _ -> entry / number.toDouble() }
     }
 
     infix fun pow(pow: Number): Vector {
-        return transform { entry, i -> entry.pow(pow.toDouble()) }
+        return transform { entry, _ -> entry.pow(pow.toDouble()) }
     }
 
     operator fun unaryMinus(): Vector {
-        return transform { entry, i -> -entry }
+        return transform { entry, _ -> -entry }
     }
 
-    val sin: Vector get() = transform { entry, i -> sin(entry) }
+    val sin: Vector get() = transform { entry, _ -> sin(entry) }
 
-    val cos: Vector get() = transform { entry, i -> cos(entry) }
+    val cos: Vector get() = transform { entry, _ -> cos(entry) }
 
-    val sqrt: Vector get() = transform { entry, i -> sqrt(entry) }
+    val sqrt: Vector get() = transform { entry, _ -> sqrt(entry) }
 
 }

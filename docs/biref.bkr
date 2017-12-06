@@ -52,7 +52,7 @@
                     "  return Math.sin(phi1) / n;",
                     "}",
                     "",
-                    "sigman = {phi1, psi, n, a, aErr, phi1Err, psiErr ->",
+                    "nErr = {phi1, psi, n, a, aErr, phi1Err, psiErr ->",
                     "  def phi2 = phi2func(phi1, psi, a)",
                     "  def nal = (0.5 * Math.sin(2 * phi1) - 0.5 * Math.sin(2 * phi2) -",
                     "             Math.cos(a) * Math.sin(phi1 - phi2)) / (2 * (n * sin(a)**2));",
