@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.25"
+        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.26"
     }
 }
 
@@ -23,19 +23,23 @@ apply plugin: 'org.jetbrains.kotlin.frontend'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     expectedBy project(":biref-base")
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile "org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.8"
+    compile "org.jetbrains.kotlinx:kotlinx-html-js:0.6.8"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
+
 }
 
 kotlinFrontend {
     npm {
-//        dependency "kotlin"
-        dependency "google-charts" // production dependency
-        dependency "bootstrap-v4-dev"
+        //dependency "kotlin"
+//        dependency "plotly"
+//        dependency "bootstrap"
     }
     webpackBundle {
         bundleName = "main"

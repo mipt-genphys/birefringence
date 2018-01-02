@@ -1,16 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Лабораторная работа Двулучепреломление</title>
+    <title>Лабораторная работа "Двулучепреломление"</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
+          integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript" language="JavaScript" src="main.bundle.js"></script>
 </head>
 <body class="app">
-<h1>Hello, Kotlin, title</h1>
-<div>
-    <h1>Here we have kotlin frontend plugin example project</h1>
-    <p id="message"></p>
-    <div id="lines"></div>
-    <p id="addForm"><input type="text"><button>Add</button> </p>
+<div class="container">
+    <h1>Лабораторная работа "Двулучепреломление"</h1>
+    <div class="row">
+        <button type="button" class="btn btn-success">Провести калибровку</button>
+        <button type="button" class="btn btn-success">Провести анализ</button>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-4" id="data">
+            <div class="container">
+                <form>
+                    <div class="form-group row">
+                        <label for="aField" class="col-sm-4 col-form-label col-form-label-sm">&alpha;</label>
+                        <div class="col-sm-8">
+                            <input
+                                    type="number"
+                                    class="form-control form-control-sm"
+                                    id="aField"
+                                    placeholder="col-form-label-sm"
+                                    min="25"
+                                    max="30"
+                                    step="0.1"
+                                    value="28">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="errField" class="col-sm-4 col-form-label col-form-label-sm">error</label>
+                        <div class="col-sm-8">
+                            <input
+                                    type="number"
+                                    class="form-control form-control-sm"
+                                    id="errField"
+                                    placeholder="col-form-label-sm"
+                                    min="0"
+                                    max="2"
+                                    step="0.05"
+                                    value="0.5">
+                        </div>
+                    </div>
+                </form>
+                <hr>
+                <div class="row">
+                    <button type="button" class="btn btn-primary">Загрузить</button>
+                    <button type="button" class="btn btn-primary">Сохранить</button>
+                </div>
+                <hr>
+            </div>
+        </div>
+        <div class="col-8" id="plot" style="height: 600px;">
+
+        </div>
+    </div>
+</div>
+<div class="jumbotron">
+    <h1>Log:</h1>
+    <div class="container" id="log">
+
+    </div>
 </div>
 </body>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+        integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
+        crossorigin="anonymous"></script>
 </html>

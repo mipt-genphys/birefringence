@@ -178,7 +178,7 @@ fun calibrate(ui: BirefUI) {
     val chi2const = (((nVector - base) / sigmanVector).pow(2)).sum();
     ui.message("\tno = ${format(noConst, 3)} \u00b1 ${format(noErr, 3)}, chi2 = ${format(chi2const)}, количество степеней свободы: ${ndf + 1}.")
 
-    ui.plotOConst(0.0, maxCos2, noConst)
+    ui.plotOConst(noConst, 0.0, maxCos2)
     ui.plotOFit(0.0, maxCos2) { it * slope + base }
 }
 

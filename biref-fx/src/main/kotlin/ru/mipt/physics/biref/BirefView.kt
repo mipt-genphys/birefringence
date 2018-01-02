@@ -27,7 +27,7 @@ import java.util.regex.Pattern
 /**
  * Created by darksnake on 28-Dec-16.
  */
-class BirefView : View("Biref"), BirefUI {
+class BirefView : View("Лабораторная работа \"Двулучепреломление\""), BirefUI {
     override var data: List<DataPoint>
         get() = tableView.items.map { DataPoint(it.phi1 * D2R, it.psio * D2R, it.psie * D2R) }
         set(value) = runLater {
@@ -84,7 +84,6 @@ class BirefView : View("Biref"), BirefUI {
     init {
         primaryStage.minHeight = 600.0;
         primaryStage.minWidth = 800.0;
-        title = "Лабораторная работа \"Двулучепреломление\""
 
         //Action to clear output
         val clearOutAction = MenuItem("Очистить");
@@ -280,7 +279,7 @@ class BirefView : View("Biref"), BirefUI {
         HelpFragment().openWindow(owner = primaryStage.scene.window, escapeClosesWindow = true)
     }
 
-    override fun plotOConst(a: Double, b: Double, const: Double) {
+    override fun plotOConst(const: Double, a: Double, b: Double) {
         runLater {
             oConstant.clear();
             var x = a;

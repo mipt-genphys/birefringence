@@ -27,16 +27,16 @@ fun main(args: Array<String>) {
 }
 
 fun start(state: dynamic): Application? {
-    if (document.body?.hasClass("app") ?: false) {
-        val application = MainApplication()
+    return if (document.body?.hasClass("app") == true) {
+        val application = BirefJSApp()
 
         @Suppress("UnsafeCastFromDynamic")
-        application.start(state?.appState ?: emptyMap<String,Any>())
+        application.start(state?.appState ?: emptyMap())
 
-        return application
+        application
     } else {
         println("Application body not found")
-        return null
+        null
     }
 }
 

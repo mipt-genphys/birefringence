@@ -26,7 +26,7 @@ interface BirefUI {
     /**
      * Plot a constant line for ordinary wave
      */
-    fun plotOConst(a: Double = 0.0, b: Double = 0.4, const: Double)
+    fun plotOConst(const: Double, a: Double = 0.0, b: Double = 0.4)
 
     /**
      * Plot data for ordinary wave
