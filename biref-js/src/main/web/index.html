@@ -6,72 +6,123 @@
           integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript" language="JavaScript" src="main.bundle.js"></script>
+    <!--<link rel="stylesheet" href="css/override.css">-->
+    <!--<script type="text/javascript" language="JavaScript" src="js/jsgrid.field.real.js"></script>-->
+
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css"/>
+    <link type="text/css" rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css"/>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+
+    <script>
+        // $(function () {
+        //
+        //     var TextField = jsGrid.TextField;
+        //
+        //     var RealField = function(config) {
+        //         jsGrid.Field.call(this, config);
+        //     };
+        //
+        //     RealField.prototype = new TextField({
+        //
+        //         sorter: "number",
+        //         align: "right",
+        //         readOnly: false,
+        //
+        //         filterValue: function () {
+        //             return this.filterControl.val()
+        //                 ? parseFloat(this.filterControl.val() || 0)
+        //                 : undefined;
+        //         },
+        //
+        //         insertValue: function () {
+        //             return this.insertControl.val()
+        //                 ? parseFloat(this.insertControl.val() || 0)
+        //                 : undefined;
+        //         },
+        //
+        //         editValue: function () {
+        //             return this.editControl.val()
+        //                 ? parseFloat(this.editControl.val() || 0)
+        //                 : undefined;
+        //         },
+        //
+        //         _createTextBox: function () {
+        //             return $("<input>").attr("type", "number")
+        //                 .prop("readonly", !this.readOnly);
+        //         }
+        //     });
+        //
+        //     jsGrid.fields.real = RealField;
+        //
+        // });
+    </script>
 </head>
 <body class="app">
 <div class="container">
     <h1>Лабораторная работа "Двулучепреломление"</h1>
-    <div class="row">
-        <button type="button" class="btn btn-success">Провести калибровку</button>
-        <button type="button" class="btn btn-success">Провести анализ</button>
+    <div class="button-bar">
+        <button type="button" id="loadButton" class="btn btn-primary">Загрузить</button>
+        <button type="button" id="saveButton" class="btn btn-primary">Сохранить</button>
+        <button type="button" id="calibrateButton" class="btn btn-success">Провести калибровку</button>
+        <button type="button" id="analyzeButton" class="btn btn-success">Провести анализ</button>
     </div>
     <hr>
     <div class="row">
-        <div class="col-4" id="data">
-            <div class="container">
-                <form>
-                    <div class="form-group row">
-                        <label for="aField" class="col-sm-4 col-form-label col-form-label-sm">&alpha;</label>
-                        <div class="col-sm-8">
-                            <input
-                                    type="number"
-                                    class="form-control form-control-sm"
-                                    id="aField"
-                                    placeholder="col-form-label-sm"
-                                    min="25"
-                                    max="30"
-                                    step="0.1"
-                                    value="28">
-                        </div>
+        <div class="col-lg-4 col-sm" id="data">
+            <form>
+                <div class="form-group row">
+                    <label for="aField" class="col-sm-4 col-form-label col-form-label-sm">&alpha;</label>
+                    <div class="col-sm-8">
+                        <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="aField"
+                                placeholder="col-form-label-sm"
+                                min="30 "
+                                max="45"
+                                step="0.1"
+                                value="38">
                     </div>
-
-                    <div class="form-group row">
-                        <label for="errField" class="col-sm-4 col-form-label col-form-label-sm">error</label>
-                        <div class="col-sm-8">
-                            <input
-                                    type="number"
-                                    class="form-control form-control-sm"
-                                    id="errField"
-                                    placeholder="col-form-label-sm"
-                                    min="0"
-                                    max="2"
-                                    step="0.05"
-                                    value="0.5">
-                        </div>
-                    </div>
-                </form>
-                <hr>
-                <div class="row">
-                    <button type="button" class="btn btn-primary">Загрузить</button>
-                    <button type="button" class="btn btn-primary">Сохранить</button>
                 </div>
-                <hr>
-            </div>
+
+                <div class="form-group row">
+                    <label for="errField" class="col-sm-4 col-form-label col-form-label-sm">error</label>
+                    <div class="col-sm-8">
+                        <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="errField"
+                                placeholder="col-form-label-sm"
+                                min="0"
+                                max="2"
+                                step="0.05"
+                                value="0.5">
+                    </div>
+                </div>
+            </form>
+            <hr>
+            <div id="table"></div>
+
         </div>
-        <div class="col-8" id="plot" style="height: 600px;">
+        <div class="col-lg-8 col-sm" id="plot" style="height: 600px;">
 
         </div>
     </div>
-</div>
-<div class="jumbotron">
-    <h1>Log:</h1>
-    <div class="container" id="log">
 
+    <div class="jumbotron">
+        <h1>Log:</h1>
+        <div class="container" id="log">
+
+        </div>
     </div>
+
 </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
         crossorigin="anonymous"></script>

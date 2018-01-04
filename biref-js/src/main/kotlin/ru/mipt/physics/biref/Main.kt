@@ -3,9 +3,20 @@ package ru.mipt.physics.biref
 import kotlin.browser.document
 import kotlin.dom.hasClass
 
+fun js(builder: dynamic.() -> Unit): dynamic {
+    val obj = Any().asDynamic()
+    builder.invoke(obj)
+    return obj
+}
+
+private var application: Application? = null
+
+fun app(): Application?{
+    return application
+}
 
 fun main(args: Array<String>) {
-    var application: Application? = null
+
 
     val state: dynamic = module.hot?.let { hot ->
         hot.accept()

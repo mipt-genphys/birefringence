@@ -43,7 +43,7 @@ fun nErr(phi1: Double, psi: Double, n: Double, a: Double, phi1Err: Double, psiEr
 
 fun nErrVector(phi1: Vector, psi: Vector, n: Vector, a: Double, phi1Err: Double, psiErr: Double): Vector {
     val phi2 = psi - phi1 + a;
-    val res = DoubleArray(phi1.size()) { i -> 0.0 };
+    val res = DoubleArray(phi1.size()) { 0.0 };
     for (i in 0 until phi1.size()) {
         val nal = (0.5 * sin(2 * phi1[i]) - 0.5 * sin(2 * phi2[i]) -
                 cos(a) * sin(phi1[i] - phi2[i])) / (2 * (n[i] * sin(a).sqr()));
@@ -156,7 +156,7 @@ fun calibrate(ui: BirefUI) {
 
     val maxCos2 = (costhVector.values.max() ?: 0.0).sqr();
 
-    val (base, slope, chi2, cov) = fitLine(costhVector.pow(2), nVector, sigmanVector)
+    val (base, slope, chi2, _) = fitLine(costhVector.pow(2), nVector, sigmanVector)
 
     ui.message("\tПри A = ${format(ui.alpha * 180 / PI)}" +
             ", phiErr = ${format(ui.phiErr * 180 / PI)}" +
@@ -210,6 +210,7 @@ fun analyze(ui: BirefUI) {
 }
 
 fun updateDataPlot(ui: BirefUI) {
+    ui.clearFits()
     ui.plotOData(ui.data.filter { it.phi1 > 0 && it.psio > 0 }.map {
         val no = n(it.phi1, it.psio, ui.alpha);
         val noErr = nErr(it.phi1, it.psio, no, ui.alpha, ui.phiErr, ui.psiErr);

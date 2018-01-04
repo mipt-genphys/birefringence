@@ -29,18 +29,16 @@ repositories {
 dependencies {
     expectedBy project(":biref-base")
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.8"
     compile "org.jetbrains.kotlinx:kotlinx-html-js:0.6.8"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
 
 }
 
 kotlinFrontend {
-    npm {
-        //dependency "kotlin"
+//    npm {
 //        dependency "plotly"
 //        dependency "bootstrap"
-    }
+//    }
     webpackBundle {
         bundleName = "main"
         contentPath = file('src/main/web')
@@ -53,6 +51,7 @@ compileKotlin2Js {
     kotlinOptions.metaInfo = true
     kotlinOptions.outputFile = "$project.buildDir.path/js/${project.name}.js"
     kotlinOptions.sourceMap = true
+    kotlinOptions.sourceMapEmbedSources = "always"
     kotlinOptions.moduleKind = 'umd'
     kotlinOptions.main = "call"
 }

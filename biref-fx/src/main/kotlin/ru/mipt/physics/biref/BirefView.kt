@@ -87,7 +87,7 @@ class BirefView : View("Лабораторная работа \"Двулучеп
 
         //Action to clear output
         val clearOutAction = MenuItem("Очистить");
-        clearOutAction.setOnAction { event -> output.clear() }
+        clearOutAction.setOnAction { output.clear() }
         output.contextMenu = ContextMenu(clearOutAction);
 
         with(tableView) {
@@ -291,7 +291,6 @@ class BirefView : View("Лабораторная работа \"Двулучеп
     }
 
     private fun updatePlot() {
-        clearFits()
         updateDataPlot(this)
     }
 
