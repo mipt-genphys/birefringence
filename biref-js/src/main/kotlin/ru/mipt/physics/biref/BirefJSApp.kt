@@ -1,15 +1,23 @@
 package ru.mipt.physics.biref
 
-import jquery.jq
 import kotlinx.html.dom.append
 import kotlinx.html.js.hr
 import kotlinx.html.js.p
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.Event
+import org.w3c.files.*
 import kotlin.browser.document
-import kotlin.js.Json
-import kotlin.js.json
+import kotlin.js.*
+
+@JsName("$")
+external fun jq(el: Element): dynamic
+
+external fun confirm(text: String): Boolean
+
+external val jsGrid: dynamic
 
 class BirefJSApp : Application, BirefUI {
 
@@ -196,7 +204,7 @@ class BirefJSApp : Application, BirefUI {
     }
 
     private fun updateTable() {
-        jq(table).asDynamic().jsGrid("render")
+        jq(table).jsGrid("render")
     }
 
     private fun updatePlot() {
@@ -204,11 +212,7 @@ class BirefJSApp : Application, BirefUI {
         updateDataPlot(this)
     }
 
-    // js states
-    override fun start(state: Map<String, Any>) {
-
-        message("Starting application...")
-        ln()
+    private fun setupPlots(state: Map<String, Any>) {
         val layout = js {
             title = "Графики"
             showlegend = true
@@ -233,7 +237,9 @@ class BirefJSApp : Application, BirefUI {
             }
         }
         newPlot(frame, arrayOf(oData, eData, oConst, oFit, eFit), layout)
+    }
 
+    private fun setupTable(state: Map<String, Any>) {
         js("""
 
         function FloatField(config) {
@@ -266,83 +272,133 @@ class BirefJSApp : Application, BirefUI {
         jsGrid.fields.float = FloatField;
         """)
 
+        jq(table).jsGrid(
+                js {
+                    width = "100%"
+                    height = "400px"
 
+                    /*
+                     * look here: {@link http://js-grid.com/docs/#grid-controller} for reference
+                     */
+                    controller = js {
+                        loadData = { filter: dynamic ->
+                            println("loading items with filter: $filter")
+                            _data.toTypedArray()
+                        }
+                        insertItem = { item: dynamic ->
+                            println("inserting item: $item")
+                            val point = MutableDataPoint(
+                                    phi1 = item.phi1,
+                                    psio = item.psio,
+                                    psie = item.psie
+                            )
+                            _data.add(point)
+                            point
+                        }
 
-        jq(table).asDynamic().jsGrid(js
-        {
-            width = "100%"
-            height = "400px"
+                        deleteItem = { item: dynamic ->
+                            println("removing item: $item.")
+                            _data.remove(item as MutableDataPoint)
+                            item
+                        }
+                    }
 
-            /*
-             * look here: {@link http://js-grid.com/docs/#grid-controller} for reference
-             */
-            controller = js {
-                loadData = { filter: dynamic ->
-                    println("loading items with filter: $filter")
-                    _data.toTypedArray()
-                }
-                insertItem = { item: dynamic ->
-                    println("inserting item: $item")
-                    val point = MutableDataPoint(
-                            phi1 = item.phi1,
-                            psio = item.psio,
-                            psie = item.psie
+                    autoload = true
+                    confirmDeleting = false
+
+                    inserting = true
+                    editing = true
+                    sorting = true
+
+                    onItemUpdated = {
+                        updatePlot()
+                    }
+
+                    onItemDeleted = {
+                        updatePlot()
+                    }
+
+                    onItemInserted = {
+                        updatePlot()
+                    }
+
+                    fields = arrayOf(
+                            js { name = "phi1"; width = 20; validate = "required"; type = "float" },
+                            js { name = "psio"; width = 20; type = "float" },
+                            js { name = "psie"; width = 20; type = "float" },
+                            js { type = "control"; width = 20; editButton = false }
                     )
-                    _data.add(point)
-                    point
                 }
+        )
+    }
 
-                deleteItem = { item: dynamic ->
-                    println("removing item: $item.")
-                    _data.remove(item as MutableDataPoint)
-                    item
+
+    /**
+     * Handle mouse drag according to https://www.html5rocks.com/en/tutorials/file/dndfiles/
+     */
+    private fun handleDragOver(event: Event) {
+        event.stopPropagation()
+        event.preventDefault()
+        event.asDynamic().dataTransfer.dropEffect = "copy"
+    }
+
+    /**
+     * Load data from text file
+     */
+    private fun loadData(event: Event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        val file = (event.asDynamic().dataTransfer.files as FileList)[0]
+                ?: throw RuntimeException("Failed to load file");
+        FileReader().apply {
+            onload = {
+                val string = result as String
+                if (_data.isEmpty() || confirm("Заменить ранее загруженные данные?")) {
+                    _data.clear()
+                    string.lines().filter { !it.trim().startsWith("#") && !it.isEmpty() }.forEach {
+                        val values = it.trim().split(Regex("\\s+"))
+                        _data.add(MutableDataPoint(phi1 = values[0].toDouble(), psio = values[1].toDouble(), psie = values[2].toDouble()));
+                    }
+                    updateTable()
+                    updatePlot()
                 }
             }
+            readAsText(file)
+        }
+    }
 
-            autoload = true
-            confirmDeleting = false
+    /**
+     * Described here: https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
+     */
+    private fun saveData(event: Event) {
+        event.stopPropagation();
+        event.preventDefault();
 
-            inserting = true
-            editing = true
-            sorting = true
+        val fileSaver = require("file-saver")
+        val text = _data.joinToString("\n", "[", "]") { it.toString() }
+        val blob = Blob(arrayOf(text), BlobPropertyBag("text/plain;charset=utf-8"));
+        fileSaver.saveAs(blob, "biref_data.txt");
+    }
 
-            fields = arrayOf(
-                    js { name = "phi1"; width = 20; validate = "required"; type = "float" },
-                    js { name = "psio"; width = 20; type = "float" },
-                    js { name = "psie"; width = 20; type = "float" },
-                    js { type = "control"; width = 20; editButton = false }
-            )
-        })
+    // js states
+    override fun start(state: Map<String, Any>) {
+
+        message("Starting application...")
+        ln()
+
+        setupPlots(state)
+        setupTable(state)
+
 
         (document.getElementById("saveButton") as? HTMLButtonElement)?.onclick = {
-            println(_data.joinToString("\n", "[", "]") { it.toString() })
+            saveData(it)
         }
 
-        (document.getElementById("loadButton") as? HTMLButtonElement)?.onclick = {
-            val data = "\t10\t32.5\t22\t\n" +
-                    "\t15\t30\t21\t    \n" +
-                    "\t20\t28\t20.5    \n" +
-                    "\t25\t27\t20\t\n" +
-                    "\t27.5\t26.7\t20\t        \n" +
-                    "\t30\t26.5\t20\t        \n" +
-                    "\t32.5\t26.5\t20.5    \n" +
-                    "\t35\t27\t21\t    \n" +
-                    "\t40 \t27\t21.5\n" +
-                    "\t45\t28\t22.5\n" +
-                    "\t50\t29\t24\t\n" +
-                    "\t55\t30.5\t25.5  \n" +
-                    "\t60\t32\t27\t\n" +
-                    "\t65\t34.5\t30\t\n" +
-                    "\t70\t37\t32.5"
-
-            data.lines().forEach {
-                val values = it.trim().split(Regex("\\s+"))
-                _data.add(MutableDataPoint(phi1 = values[0].toDouble(), psio = values[1].toDouble(), psie = values[2].toDouble()));
-            }
-            updateTable()
-            updatePlot()
+        (document.getElementById("drop_zone") as? HTMLDivElement)?.apply {
+            addEventListener("dragover", { handleDragOver(it) }, false)
+            addEventListener("drop", { loadData(it) }, false)
         }
-
 
         (document.getElementById("calibrateButton") as? HTMLButtonElement)?.onclick = {
             calibrate(this)

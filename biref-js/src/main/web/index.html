@@ -13,6 +13,8 @@
     <link type="text/css" rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css"/>
 
+    <link type="text/css" rel="stylesheet" href="css/override.css"/>
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
             crossorigin="anonymous"></script>
@@ -23,10 +25,10 @@
 <div class="container">
     <h1>Лабораторная работа "Двулучепреломление"</h1>
     <div class="button-bar">
-        <button type="button" id="loadButton" class="btn btn-primary">Загрузить</button>
-        <button type="button" id="saveButton" class="btn btn-primary">Сохранить</button>
         <button type="button" id="calibrateButton" class="btn btn-success">Провести калибровку</button>
         <button type="button" id="analyzeButton" class="btn btn-success">Провести анализ</button>
+
+        <button type="button" id="saveButton" class="btn btn-primary">Сохранить</button>
     </div>
     <hr>
     <div class="row">
@@ -63,8 +65,9 @@
                 </div>
             </form>
             <hr>
-            <div id="table"></div>
+            <div id="drop_zone">Загрузить данные<br/>(перетащить файл сюда)</div>
 
+            <div id="table"></div>
         </div>
         <div class="col-lg-8 col-sm" id="plot" style="height: 600px;">
 

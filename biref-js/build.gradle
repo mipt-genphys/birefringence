@@ -9,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.26"
+        classpath "org.jetbrains.kotlin:kotlin-frontend-plugin:0.0.27"
     }
 }
 
@@ -35,10 +35,11 @@ dependencies {
 }
 
 kotlinFrontend {
-//    npm {
+    npm {
+        dependency "file-saver"
 //        dependency "plotly"
 //        dependency "bootstrap"
-//    }
+    }
     webpackBundle {
         bundleName = "main"
         contentPath = file('src/main/web')
