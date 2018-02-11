@@ -10,12 +10,15 @@ import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.Event
 import org.w3c.files.*
 import kotlin.browser.document
+import kotlin.dom.clear
 import kotlin.js.*
 
 @JsName("$")
 external fun jq(el: Element): dynamic
 
 external fun confirm(text: String): Boolean
+
+external fun alert(text: String)
 
 external val jsGrid: dynamic
 
@@ -78,6 +81,8 @@ class BirefJSApp : Application, BirefUI {
 
 
     data class MutableDataPoint(var phi1: Double, var psio: Double, var psie: Double)
+
+    val retain = true
 
     /**
      * Internal data in degrees
@@ -191,12 +196,14 @@ class BirefJSApp : Application, BirefUI {
         oFit["visible"] = false
         eFit["visible"] = false
         refresh()
+        log.clear()
     }
 
     override fun cleatPlots() {
         oData["visible"] = false
         eData["visible"] = false
         refresh()
+        log.clear()
     }
 
     private fun refresh() {
@@ -376,8 +383,15 @@ class BirefJSApp : Application, BirefUI {
         event.preventDefault();
 
         val fileSaver = require("file-saver")
-        val text = _data.joinToString("\n", "[", "]") { it.toString() }
-        val blob = Blob(arrayOf(text), BlobPropertyBag("text/plain;charset=utf-8"));
+        val builder = StringBuilder()
+        builder.append("# Данные лабораторной работы по двулучепреломлению\r\n")
+        builder.append("# ${Date(Date.now())}\r\n")
+        builder.append("#\tphi1\tpsio\tpsie\r\n")
+        _data.forEach {
+            builder.append(" \t${it.phi1}\t${it.psio}\t${it.psie}\r\n")
+        }
+
+        val blob = Blob(arrayOf(builder.toString()), BlobPropertyBag("text/plain;charset=utf-8"));
         fileSaver.saveAs(blob, "biref_data.txt");
     }
 
@@ -392,7 +406,11 @@ class BirefJSApp : Application, BirefUI {
 
 
         (document.getElementById("saveButton") as? HTMLButtonElement)?.onclick = {
-            saveData(it)
+            if (!_data.isEmpty()) {
+                saveData(it)
+            } else {
+                alert("Необходимо заполнить таблицу данных")
+            }
         }
 
         (document.getElementById("drop_zone") as? HTMLDivElement)?.apply {
@@ -401,11 +419,19 @@ class BirefJSApp : Application, BirefUI {
         }
 
         (document.getElementById("calibrateButton") as? HTMLButtonElement)?.onclick = {
-            calibrate(this)
+            if (!_data.isEmpty()) {
+                calibrate(this)
+            } else {
+                alert("Необходимо заполнить таблицу данных")
+            }
         }
 
         (document.getElementById("analyzeButton") as? HTMLButtonElement)?.onclick = {
-            analyze(this)
+            if (!_data.isEmpty()) {
+                analyze(this)
+            } else {
+                alert("Необходимо заполнить таблицу данных")
+            }
         }
 
         (document.getElementById("aField") as? HTMLInputElement)?.onchange = {

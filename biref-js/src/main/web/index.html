@@ -19,16 +19,50 @@
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
             crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+    <script>
+
+        var tooltip = false;
+
+        function toggleHelp() {
+            tooltip = !tooltip;
+            if (tooltip) {
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip('show')
+                })
+            } else {
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip('hide')
+                })
+            }
+        }
+
+    </script>
 
 </head>
 <body class="app">
 <div class="container">
     <h1>Лабораторная работа "Двулучепреломление"</h1>
-    <div class="button-bar">
-        <button type="button" id="calibrateButton" class="btn btn-success">Провести калибровку</button>
-        <button type="button" id="analyzeButton" class="btn btn-success">Провести анализ</button>
+    <div class="button-bar" role="toolbar">
+        <button type="button" id="calibrateButton" class="btn btn-success" data-toggle="tooltip"
+                data-placement="left"
+                title="Провести калибровку с использованием данных для обыкновенной волны">
+            Калибровка
+        </button>
+        <button type="button" id="analyzeButton" class="btn btn-success" data-toggle="tooltip"
+                data-placement="bottom"
+                title="Провести Анализ с использованием данных для необыкновенной волны">
+            Анализ
+        </button>
 
-        <button type="button" id="saveButton" class="btn btn-primary">Сохранить</button>
+        <button type="button" id="saveButton" class="btn btn-primary" data-toggle="tooltip" data-placement="right"
+                title="Сохранить данные в текстовом формате">Сохранить
+        </button>
+        <button type="button" id="helpButton" class="btn btn-info float-right"
+                onclick="toggleHelp()"
+                data-toggle="tooltip" data-placement="bottom" html="true"
+                title="Для проведения анализа необходимо ввести данные в таблицу и запустить калибровку либо анализ соответствующими кнопками">
+            Справка
+        </button>
     </div>
     <hr>
     <div class="row">
@@ -45,7 +79,10 @@
                                 min="30 "
                                 max="45"
                                 step="0.1"
-                                value="38">
+                                value="38"
+                                data-toggle="tooltip"
+                                data-placement="right"
+                                title="Угол при вершине пирзмы">
                     </div>
                 </div>
 
@@ -60,14 +97,21 @@
                                 min="0"
                                 max="2"
                                 step="0.05"
-                                value="0.5">
+                                value="0.5"
+                                data-toggle="tooltip"
+                                data-placement="right"
+                                title="Точность измерения углов">
                     </div>
                 </div>
             </form>
             <hr>
-            <div id="drop_zone">Загрузить данные<br/>(перетащить файл сюда)</div>
+            <div id="drop_zone" data-toggle="tooltip" data-placement="right"
+                 title="Для загрузки данных в текстовом формате, надо перетащить файл сюда">
+                Загрузить данные<br/>(перетащить файл сюда)
+            </div>
 
-            <div id="table"></div>
+            <div id="table" data-toggle="tooltip" data-placement="top"
+                 title="Данные для анализа"></div>
         </div>
         <div class="col-lg-8 col-sm" id="plot" style="height: 600px;">
 
