@@ -10,16 +10,21 @@ import kotlin.math.sqrt
  */
 class Vector(val values: DoubleArray) {
 
-    fun size(): Int {
-        return values.size;
-    }
+    val size: Int = values.size
 
+    /**
+     * implement get operation to access values by index
+     */
     operator fun get(i: Int): Double {
         return values[i];
     }
 
-    private fun transform(trans: (Double, Int) -> Double): Vector {
-        val newValues = DoubleArray(size()) { i -> trans(values[i], i) };
+    /**
+     * Produce a new vector applying a transformation to each of this vector entries
+     * @param trans a function taking entry and its index and producing a floating point number
+     */
+    internal fun transform(trans: (Double, Int) -> Double): Vector {
+        val newValues = DoubleArray(size) { i -> trans(values[i], i) };
         return Vector(newValues);
     }
 
@@ -73,10 +78,10 @@ class Vector(val values: DoubleArray) {
         return transform { entry, _ -> -entry }
     }
 
-    val sin: Vector get() = transform { entry, _ -> sin(entry) }
-
-    val cos: Vector get() = transform { entry, _ -> cos(entry) }
-
-    val sqrt: Vector get() = transform { entry, _ -> sqrt(entry) }
-
 }
+
+fun sin(vector: Vector) = vector.transform { entry, _ -> sin(entry) }
+
+fun cos(vector: Vector) = vector.transform { entry, _ -> cos(entry) }
+
+fun sqrt(vector: Vector) = vector.transform { entry, _ -> sqrt(entry) }

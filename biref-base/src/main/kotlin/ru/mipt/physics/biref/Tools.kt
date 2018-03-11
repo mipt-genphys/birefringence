@@ -15,7 +15,7 @@ fun Double.sqr(): Double {
 
 fun nVector(phi1: Vector, psi: Vector, a: Double): Vector {
     val phi2 = psi - phi1 + a;
-    return (phi1.sin.pow(2) + phi2.sin.pow(2) + phi1.sin * phi2.sin * cos(a) * 2).sqrt / sin(a);
+    return sqrt(sin(phi1).pow(2) + sin(phi2).pow(2) + sin(phi1) * sin(phi2) * cos(a) * 2) / sin(a);
 }
 
 fun n(phi1: Double, psi: Double, a: Double): Double {
@@ -24,7 +24,7 @@ fun n(phi1: Double, psi: Double, a: Double): Double {
 }
 
 fun cosThetaVector(phi1: Vector, n: Vector): Vector {
-    return phi1.sin / n;
+    return sin(phi1) / n;
 }
 
 fun cosTheta(phi1: Double, n: Double): Double {
@@ -43,8 +43,8 @@ fun nErr(phi1: Double, psi: Double, n: Double, a: Double, phi1Err: Double, psiEr
 
 fun nErrVector(phi1: Vector, psi: Vector, n: Vector, a: Double, phi1Err: Double, psiErr: Double): Vector {
     val phi2 = psi - phi1 + a;
-    val res = DoubleArray(phi1.size()) { 0.0 };
-    for (i in 0 until phi1.size()) {
+    val res = DoubleArray(phi1.size) { 0.0 };
+    for (i in 0 until phi1.size) {
         val nal = (0.5 * sin(2 * phi1[i]) - 0.5 * sin(2 * phi2[i]) -
                 cos(a) * sin(phi1[i] - phi2[i])) / (2 * (n[i] * sin(a).sqr()));
         val nb = -(sin(phi2[i]) * cos(phi2[i]) +
@@ -152,7 +152,7 @@ fun calibrate(ui: BirefUI) {
     val nVector = nVector(phi1, psio, ui.alpha);
     val costhVector = cosThetaVector(phi1, nVector);
     val sigmanVector = nErrVector(phi1, psio, nVector, ui.alpha, ui.phiErr, ui.psiErr);
-    val ndf = phi1.size() - 2
+    val ndf = phi1.size - 2
 
     val maxCos2 = (costhVector.values.max() ?: 0.0).sqr();
 
@@ -196,7 +196,7 @@ fun analyze(ui: BirefUI) {
 
     val (no, noErr, ne, neErr, chi2) = calculate(nVector, costhVector, sigmanVector);
 
-    val ndf = phi1.size() - 2
+    val ndf = phi1.size - 2
 
     val func = { costh2: Double -> 1.0 / sqrt(costh2 / no.sqr() + (1 - costh2) / ne.sqr()) }
     ui.message("\tПри A = ${format(ui.alpha * 180 / PI)}" +
