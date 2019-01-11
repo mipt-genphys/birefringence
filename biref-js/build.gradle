@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    expectedBy project(":biref-base")
+    expectedBy project(":biref-common")
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
     compile "org.jetbrains.kotlinx:kotlinx-html-js:0.6.8"
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"

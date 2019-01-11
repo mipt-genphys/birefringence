@@ -1,5 +1,5 @@
 rootProject.name = 'birefringence'
-include 'biref-base'
+include 'biref-common'
 include 'biref-fx'
 include 'biref-js'
 
