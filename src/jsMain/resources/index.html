@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Лабораторная работа "Двулучепреломление"</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
+          integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" language="JavaScript" src="main.bundle.js"></script>
+    <!--<link rel="stylesheet" href="css/override.css">-->
+    <!--<script type="text/javascript" language="JavaScript" src="js/jsgrid.field.real.js"></script>-->
+
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css"/>
+    <link type="text/css" rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css"/>
+
+    <link type="text/css" rel="stylesheet" href="css/override.css"/>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+    <script>
+
+        var tooltip = false;
+
+        function toggleHelp() {
+            tooltip = !tooltip;
+            if (tooltip) {
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip('show')
+                })
+            } else {
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip('hide')
+                })
+            }
+        }
+
+    </script>
+
+</head>
+<body class="app">
+<div class="container">
+    <h1>Лабораторная работа "Двулучепреломление" (<a href="http://npm.mipt.ru/pages/biref/" target="_blank">Описание</a>)</h1>
+    <div class="button-bar" role="toolbar">
+        <button type="button" id="calibrateButton" class="btn btn-success" data-toggle="tooltip"
+                data-placement="left"
+                title="Провести калибровку с использованием данных для обыкновенной волны">
+            Калибровка
+        </button>
+        <button type="button" id="analyzeButton" class="btn btn-success" data-toggle="tooltip"
+                data-placement="bottom"
+                title="Провести Анализ с использованием данных для необыкновенной волны">
+            Анализ
+        </button>
+
+        <button type="button" id="saveButton" class="btn btn-primary" data-toggle="tooltip" data-placement="right"
+                title="Сохранить данные в текстовом формате">Сохранить
+        </button>
+        <button type="button" id="helpButton" class="btn btn-info float-right"
+                onclick="toggleHelp()"
+                data-toggle="tooltip" data-placement="bottom" html="true"
+                title="Для проведения анализа необходимо ввести данные в таблицу и запустить калибровку либо анализ соответствующими кнопками">
+            Справка
+        </button>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-lg-4 col-sm" id="data">
+            <form>
+                <div class="form-group row">
+                    <label for="aField" class="col-sm-4 col-form-label col-form-label-sm">&alpha;</label>
+                    <div class="col-sm-8">
+                        <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="aField"
+                                placeholder="col-form-label-sm"
+                                min="30 "
+                                max="45"
+                                step="0.1"
+                                value="38"
+                                data-toggle="tooltip"
+                                data-placement="right"
+                                title="Угол при вершине пирзмы">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="errField" class="col-sm-4 col-form-label col-form-label-sm">error</label>
+                    <div class="col-sm-8">
+                        <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="errField"
+                                placeholder="col-form-label-sm"
+                                min="0"
+                                max="2"
+                                step="0.05"
+                                value="0.5"
+                                data-toggle="tooltip"
+                                data-placement="right"
+                                title="Точность измерения углов">
+                    </div>
+                </div>
+            </form>
+            <hr>
+            <div id="drop_zone" data-toggle="tooltip" data-placement="right"
+                 title="Для загрузки данных в текстовом формате, надо перетащить файл сюда">
+                Загрузить данные<br/>(перетащить файл сюда)
+            </div>
+
+            <div id="table" data-toggle="tooltip" data-placement="top"
+                 title="Данные для анализа"></div>
+        </div>
+        <div class="col-lg-8 col-sm" id="plot" style="height: 600px;">
+
+        </div>
+    </div>
+
+    <div class="jumbotron">
+        <h1>Log:</h1>
+        <div class="container" id="log">
+
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="card">
+            <div class="card-footer text-muted">
+                <p>Разработано группой <a href="http://npm.mipt.ru/">mipt-npm</a> для кафедры общей физики МФТИ в 2018 году</p>
+                <p>Программа написана на языке <a href="https://kotlinlang.org/">Kotlin</a>, используются пакеты <a
+                        href="https://getbootstrap.com/">Bootstrap</a>, <a href="https://plot.ly/javascript/">Plotly</a> и <a
+                        href="http://js-grid.com/">jsgrid</a></p>
+            </div>
+
+        </div>
+    </footer>
+</div>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
+        integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
+        crossorigin="anonymous"></script>
+</html>
