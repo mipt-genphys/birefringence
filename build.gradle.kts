@@ -75,21 +75,3 @@ kotlin {
 javafx{
     modules("javafx.controls","javafx.web","javafx.fxml")
 }
-
-//tasks.register<JavaExec>("runSwing") {
-//    group = "run"
-//    val target = kotlin.targets["jvm"]
-//    val compilation: KotlinCompilationToRunnableFiles<KotlinCommonOptions> =
-//        target.compilations["main"] as KotlinCompilationToRunnableFiles<KotlinCommonOptions>
-//
-//    val classes = files(
-//        compilation.runtimeDependencyFiles,
-//        compilation.output.allOutputs
-//    )
-//    classpath = classes
-//
-//
-//    main = "ru.mipt.phys.diffraction.AppFrameKt"
-//}
-
-//defaultTasks("runSwing")
