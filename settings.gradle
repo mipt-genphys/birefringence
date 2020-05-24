@@ -1,5 +1,0 @@
-rootProject.name = 'birefringence'
-include 'biref-common'
-include 'biref-fx'
-include 'biref-js'
-
