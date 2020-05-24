@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.3.61"
+    kotlin("multiplatform") version "1.3.72"
     id("org.openjfx.javafxplugin") version "0.0.8"
     application
 }
@@ -28,7 +28,14 @@ kotlin {
     }
 
     js{
-        browser()
+        browser{
+            webpackTask {
+                group = "distribution"
+            }
+            distribution {
+                directory = buildDir.resolve("installJS")
+            }
+        }
     }
 
     sourceSets {
